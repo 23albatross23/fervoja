@@ -1,0 +1,143 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Apr 11 18:26:18 2026
+
+@author: Álvaro Pauner Argudo
+
+Module defining the value classes.
+"""
+
+# Copyright (C) 2026  Álvaro Pauner Argudo <railpy.project@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+from abc import ABC, abstractmethod
+from enum import Enum
+
+class ErrorCode(Enum):
+    TYPE = 0
+    RANGE = 1
+    BIT_SIZE = 2
+    DECODE_BUFFER = 3
+    
+class Endian(Enum):
+    BIG = "big"
+    LITTLE = "little"
+
+class ValError(Exception):
+    def __init__(self, message : str, error_code : ErrorCode):
+        self.__message = message
+        self._error_code = error_code
+        super().__init__(self.__message)
+        
+    def __str__(self):
+        return f"{self.__message} (Error Code: {self._error_code})"
+
+class Value(ABC):
+    '''Root class for the diferent field kinds'''
+    __slots__ = (
+        "__value",
+        "__bit_size",
+        "__endian",
+    )
+    def __init__(self, bit_size : int, endian : Endian):
+        self.__value = 0
+        self.__bit_size = bit_size
+        if (endian == Endian.LITTLE) and ((bit_size % 8) != 0):
+            raise ValError(
+                message="Little Endian requires byte-aligned size (multiple of 8)", 
+                error_code=ErrorCode.BIT_SIZE)
+        self.__endian = endian
+            
+    
+    def __check_buffer(self, buffer : int) -> bool:
+        return buffer.bit_length() <= self.__bit_size
+    
+    def _set_value(self, value : int):
+        self.__value = value
+        
+    def _get_value(self) -> int:
+        return self.__value
+    
+    def _get_endian(self) -> Endian:
+        return self.__endian
+    
+    @abstractmethod
+    def _unpack_from_int(self, buffer: int):
+        '''Template method for decoding the correct value to be set according the type'''
+        pass
+    
+    def get_size(self) -> int:
+        return self.__bit_size
+    
+    @abstractmethod
+    def get_value(self):
+        pass
+    
+    @abstractmethod
+    def set_value(self, value):
+        pass
+    
+    @abstractmethod
+    def encode(self) -> int:
+        pass
+    
+    def decode(self, buffer : int):
+        if not self.__check_buffer(buffer=buffer):
+            raise ValError(
+                message="Buffer value exceeds bit size capacity",
+                error_code=ErrorCode.DECODE_BUFFER)
+        
+        self._unpack_from_int(buffer = buffer)
+
+class NumericalValue(Value):
+    __slots__ = ()
+    def __init__(self, bit_size : int, endian : Endian):
+        super().__init__(bit_size=bit_size, endian=endian)
+        
+class NaturalValue(NumericalValue):
+    __slots__ = ()
+    def __init__(self, value : int, bit_size : int, endian : Endian):
+        super().__init__(bit_size=bit_size, endian=endian)
+        self.set_value(value)
+        
+    def _unpack_from_int(self, buffer: int):
+        if self._get_endian() == Endian.BIG or self.get_size() <= 8:
+            self.set_value(value=buffer)
+        else:
+            byte_count = self.get_size() // 8
+            raw_bytes = buffer.to_bytes(byte_count, byteorder=Endian.BIG.value)
+            swapped_value = int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
+            self.set_value(value=swapped_value)
+        
+    def get_value(self) -> int:
+        return self._get_value()
+     
+    def set_value(self, value : int):
+        if not isinstance(value, int):
+            raise ValError(message="Value must be a natural", error_code=ErrorCode.TYPE)
+        if value >= 0:
+            if value.bit_length() <= self.get_size():
+                self._set_value(value)
+            else:
+                raise ValError(
+                    message="Value is bigger than size", 
+                    error_code=ErrorCode.RANGE)
+        else:
+            raise ValError(
+                message="Natural values must be non-negative", 
+                error_code=ErrorCode.TYPE)
+    
+    def encode(self) -> int:
+        return self.get_value()

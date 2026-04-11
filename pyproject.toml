@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "railPy"
+name = "railpy"
 version = "0.0.1"
 description = "Rail protocol messages format library."
 readme = "README.md"
@@ -25,7 +25,8 @@ dependencies = []
 [project.optional-dependencies]
 test = [
     "pytest>=7.0.0",
-    "coverage>=7.0.0"
+    "coverage>=7.0.0",
+    "pytest-cov>=7.1.0",
 ]
 
 [project.urls]
@@ -34,7 +35,13 @@ test = [
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra -q --cov=railpy --cov-report=term-missing"
+addopts = """
+    --cov=railpy 
+    --cov-report=term-missing 
+    --cov-report=html 
+    --cov-context=test 
+    -ra -q
+"""
 testpaths = [
     "tests",
 ]
@@ -50,5 +57,14 @@ exclude_lines = [
     "if self.debug:",
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
-    "pass"
+    "pass",
+    "abstractmethod"
 ]
+
+[tool.coverage.html]
+show_contexts = true
+title = "railPy Coverage Report"
+
+[tool.setuptools.packages.find]
+include = ["railpy*"]
+exclude = ["railPy_env*", "tests*"]

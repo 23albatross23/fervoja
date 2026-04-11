@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*$py.class
+railPy_env/
+.pytest_cache/
+.coverage
+.spyproject/
+railPy.egg-info/
