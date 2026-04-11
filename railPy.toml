@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "railPy"
 version = "0.0.1"
-description = "Rail messages format library."
+description = "Rail protocol messages format library."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "GPLv3" }
@@ -29,8 +29,8 @@ test = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/tu-usuario/railPy"
-"Bug Tracker" = "https://github.com/tu-usuario/railPy/issues"
+"Homepage" = "https://github.com/23albatross23/railPy"
+"Bug Tracker" = "https://github.com/23albatross23/railPy/issues"
 
 [tool.pytest.ini_options]
 minversion = "7.0"
