@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "railPy"
+version = "0.0.1"
+description = "Rail messages format library."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "GPLv3" }
+authors = [
+    { name = "Álvaro Pauner Argudo", email = "railpy.project@gmail.com" }
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Communications",
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+dependencies = []
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+    "coverage>=7.0.0"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/tu-usuario/railPy"
+"Bug Tracker" = "https://github.com/tu-usuario/railPy/issues"
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=railpy --cov-report=term-missing"
+testpaths = [
+    "tests",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["railpy"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass"
+]
