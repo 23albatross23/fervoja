@@ -36,6 +36,7 @@ To install the library in development mode and enable the testing environment:
 git clone [https://github.com/23albatross23/railPy.git](https://github.com/23albatross23/railPy.git)
 cd railPy
 pip install -e .[test]
+```
 
 ## 🚂 Example
 TODO
