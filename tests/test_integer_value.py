@@ -1,0 +1,96 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Apr 11 22:40:03 2026
+
+@author: Álvaro Pauner Argudo
+"""
+
+# Copyright (C) 2026  Álvaro Pauner Argudo <railpy.project@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import pytest
+from railpy.foundations.values import IntegerValue, Endian, ValError, ErrorCode
+
+class TestIntegerValue:
+
+    # ==========================================
+    # 1. Range tests (2's complement)
+    # ==========================================
+
+    def test_range_limits_8bit(self):
+        val_pos = IntegerValue(value=127, bit_size=8, endian=Endian.BIG)
+        assert val_pos.get_value() == 127
+        
+        val_neg = IntegerValue(value=-128, bit_size=8, endian=Endian.BIG)
+        assert val_neg.get_value() == -128
+
+    def test_out_of_range_raises_error(self):
+        with pytest.raises(ValError) as exc_info:
+            IntegerValue(value=128, bit_size=8, endian=Endian.BIG)
+        assert exc_info.value._error_code == ErrorCode.RANGE
+
+        with pytest.raises(ValError) as exc_info:
+            IntegerValue(value=-129, bit_size=8, endian=Endian.BIG)
+        assert exc_info.value._error_code == ErrorCode.RANGE
+
+    # ==========================================
+    # 2. Decoding and encoding (sign and bits)
+    # ==========================================
+
+    def test_decode_positive(self):
+        val = IntegerValue(value=0, bit_size=8, endian=Endian.BIG)
+        val.decode(buffer=0x7F)
+        assert val.get_value() == 127
+
+    def test_decode_negative(self):
+        val = IntegerValue(value=0, bit_size=8, endian=Endian.BIG)
+        val.decode(buffer=0xFF)
+        assert val.get_value() == -1
+
+    def test_decode_min_negative(self):
+        """0x80 in 8 bits should be -128."""
+        val = IntegerValue(value=0, bit_size=8, endian=Endian.BIG)
+        val.decode(buffer=0x80) # 1000 0000
+        assert val.get_value() == -128
+
+    # ==========================================
+    # 3. Endianness Tests
+    # ==========================================
+
+    def test_decode_little_endian_negative(self):
+        val = IntegerValue(value=0, bit_size=16, endian=Endian.LITTLE)
+        # 0xFEFF in decimal is 65279
+        val.decode(buffer=0xFEFF)
+        assert val.get_value() == -2
+
+    # ==========================================
+    # 4. Integrity and typing tests
+    # ==========================================
+
+    def test_invalid_type(self):
+        val = IntegerValue(value=0, bit_size=8, endian=Endian.BIG)
+        with pytest.raises(ValError) as exc_info:
+            val.set_value("10")
+        assert exc_info.value._error_code == ErrorCode.TYPE
+
+    def test_encode_persistence_big(self):
+        val = IntegerValue(value=-50, bit_size=8, endian=Endian.BIG)
+        assert val.encode() == 0xCE
+        
+    def test_encode_persistence_little(self):
+        val = IntegerValue(value=-2, bit_size=16, endian=Endian.LITTLE)
+        encoded_val = val.encode()
+        
+        assert encoded_val == 0xFEFF

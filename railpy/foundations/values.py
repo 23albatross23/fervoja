@@ -105,6 +105,9 @@ class NumericalValue(Value):
     __slots__ = ()
     def __init__(self, bit_size : int, endian : Endian):
         super().__init__(bit_size=bit_size, endian=endian)
+    
+    def get_value(self) -> int:
+        return self._get_value()
         
 class NaturalValue(NumericalValue):
     __slots__ = ()
@@ -120,13 +123,10 @@ class NaturalValue(NumericalValue):
             raw_bytes = buffer.to_bytes(byte_count, byteorder=Endian.BIG.value)
             swapped_value = int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
             self.set_value(value=swapped_value)
-        
-    def get_value(self) -> int:
-        return self._get_value()
      
     def set_value(self, value : int):
         if not isinstance(value, int):
-            raise ValError(message="Value must be a natural", error_code=ErrorCode.TYPE)
+            raise ValError(message="Value must be an int type", error_code=ErrorCode.TYPE)
         if value >= 0:
             if value.bit_length() <= self.get_size():
                 self._set_value(value)
@@ -138,6 +138,60 @@ class NaturalValue(NumericalValue):
             raise ValError(
                 message="Natural values must be non-negative", 
                 error_code=ErrorCode.TYPE)
-    
+            
     def encode(self) -> int:
         return self.get_value()
+            
+class IntegerValue(NumericalValue):
+    '''2's complement decoding'''
+    __slots__ = ()
+    def __init__(self, value : int, bit_size : int, endian : Endian):
+        super().__init__(bit_size=bit_size, endian=endian)
+        self.set_value(value)
+        
+    def _unpack_from_int(self, buffer: int):
+        bit_size = self.get_size()
+        endian = self._get_endian()
+        if endian == Endian.LITTLE:
+            byte_count = bit_size // 8
+            raw_bytes = buffer.to_bytes(byte_count, byteorder=Endian.BIG.value)
+            buffer = int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
+
+        if buffer & (1 << (bit_size - 1)):
+            value = buffer - (1 << bit_size)
+        else:
+            value = buffer
+            
+        self.set_value(value)
+        
+    def set_value(self, value: int):
+        if not isinstance(value, int):
+            raise ValError(message="Value must be an integer", error_code=ErrorCode.TYPE)
+        
+        bit_size = self.get_size()
+        # 2's complement range: [-2^(n-1), 2^(n-1) - 1]
+        min_val = -(1 << (bit_size - 1))
+        max_val = (1 << (bit_size - 1)) - 1
+        
+        if not (min_val <= value <= max_val):
+            raise ValError(
+                message=f"Value {value} out of range for {bit_size} bits (2's complement)", 
+                error_code=ErrorCode.RANGE)
+        
+        self._set_value(value=value)
+        
+    def encode(self) -> int:
+        val = self.get_value()
+        bit_size = self.get_size()
+        
+        mask = (1 << bit_size) - 1
+        unsigned_value = val & mask
+        
+        if self._get_endian() == Endian.LITTLE:
+            byte_count = bit_size // 8
+            raw_bytes = unsigned_value.to_bytes(byte_count, byteorder=Endian.BIG.value)
+            return int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
+            
+        return unsigned_value
+
+    
