@@ -5,5 +5,5 @@ fervoja_env/
 .pytest_cache/
 .coverage
 .spyproject/
-fervoja.egg-info/
+railPy.egg-info/
 coverage_table.md
