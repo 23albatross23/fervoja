@@ -6,3 +6,4 @@ railPy_env/
 .coverage
 .spyproject/
 railPy.egg-info/
+coverage_table.md

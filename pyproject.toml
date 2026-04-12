@@ -60,6 +60,7 @@ exclude_lines = [
     "pass",
     "abstractmethod"
 ]
+skip_empty = true
 
 [tool.coverage.html]
 show_contexts = true
