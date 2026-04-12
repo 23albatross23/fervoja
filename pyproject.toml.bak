@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "GPLv3" }
 authors = [
-    { name = "Álvaro Pauner Argudo", email = "fervoja.project@gmail.com" }
+    { name = "Álvaro Pauner Argudo", email = ".project@gmail.com" }
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

@@ -5,7 +5,7 @@ Created on Sun Apr 12 02:18:42 2026
 @author: Álvaro Pauner Argudo
 """
 
-# Copyright (C) 2026  Álvaro Pauner Argudo <railpy.project@gmail.com>
+# Copyright (C) 2026  Álvaro Pauner Argudo <fervoja.project@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ Created on Sun Apr 12 02:18:42 2026
 
 import pytest
 from unittest.mock import MagicMock
-from railpy.foundations.dependencies import Dependency
+from fervoja.foundations.dependencies import Dependency
 
 class TestDependency:
     @pytest.fixture

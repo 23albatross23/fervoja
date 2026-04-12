@@ -7,7 +7,7 @@ Created on Sat Apr 11 18:26:18 2026
 Module defining the value classes.
 """
 
-# Copyright (C) 2026  Álvaro Pauner Argudo <railpy.project@gmail.com>
+# Copyright (C) 2026  Álvaro Pauner Argudo <fervoja.project@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

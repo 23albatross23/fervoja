@@ -5,7 +5,7 @@ Created on Sun Apr 12 02:01:38 2026
 @author: Álvaro Pauner Argudo
 """
 
-# Copyright (C) 2026  Álvaro Pauner Argudo <railpy.project@gmail.com>
+# Copyright (C) 2026  Álvaro Pauner Argudo <fervoja.project@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ Created on Sun Apr 12 02:01:38 2026
 
 import pytest
 from unittest.mock import MagicMock
-from railpy.foundations.fields import Field
+from fervoja.foundations.fields import Field
 
 class TestField:
 

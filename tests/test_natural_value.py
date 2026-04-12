@@ -5,7 +5,7 @@ Created on Sat Apr 11 21:32:50 2026
 @author: Álvaro Pauner Argudo
 """
 
-# Copyright (C) 2026  Álvaro Pauner Argudo <railpy.project@gmail.com>
+# Copyright (C) 2026  Álvaro Pauner Argudo <fervoja.project@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ Created on Sat Apr 11 21:32:50 2026
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import pytest
-from railpy.foundations.values import NaturalValue, Endian, ValError, ErrorCode
+from fervoja.foundations.values import NaturalValue, Endian, ValError, ErrorCode
 
 class TestNaturalValue:
     

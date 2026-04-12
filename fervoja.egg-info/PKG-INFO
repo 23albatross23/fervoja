@@ -1,3 +1,25 @@
+Metadata-Version: 2.4
+Name: fervoja
+Version: 0.0.1
+Summary: Rail protocol messages format library.
+Author-email: Álvaro Pauner Argudo <fervoja.project@gmail.com>
+License: GPLv3
+Project-URL: Homepage, https://github.com/23albatross23/fervoja
+Project-URL: Bug Tracker, https://github.com/23albatross23/fervoja/issues
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Communications
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Provides-Extra: test
+Requires-Dist: pytest>=7.0.0; extra == "test"
+Requires-Dist: coverage>=7.0.0; extra == "test"
+Requires-Dist: pytest-cov>=7.1.0; extra == "test"
+Dynamic: license-file
+
 # fervoja 🚆
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -41,19 +63,6 @@ pip install -e .[test]
 
 ## 📊 Code coverage
 <!-- coverage-start -->
-<<<<<<< HEAD
-| Name                               |    Stmts |     Miss |   Branch |   BrPart |    Cover |
-|----------------------------------- | -------: | -------: | -------: | -------: | -------: |
-| railpy/foundations/abstractions.py |        3 |        0 |        0 |        0 |     100% |
-| railpy/foundations/containers.py   |       51 |        0 |       16 |        0 |     100% |
-| railpy/foundations/dependencies.py |       11 |        0 |        2 |        0 |     100% |
-| railpy/foundations/fields.py       |       13 |        0 |        0 |        0 |     100% |
-| railpy/foundations/values.py       |      101 |        0 |       22 |        0 |     100% |
-| **TOTAL**                          |  **179** |    **0** |   **40** |    **0** | **100%** |
-
-9 empty files skipped.
-
-=======
 | Name | Stmts | Miss | Branch | BrPart | Cover |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | fervoja\foundations\abstractions.py | 3 | 0 | 0 | 0 | 100% |
@@ -62,7 +71,6 @@ pip install -e .[test]
 | fervoja\foundations\fields.py | 13 | 0 | 0 | 0 | 100% |
 | fervoja\foundations\values.py | 101 | 0 | 22 | 0 | 100% |
 | **TOTAL** | **179** | **0** | **40** | **0** | **100%** |
->>>>>>> 5a53f28 (Renaming from RailPy to fervoja)
 <!-- coverage-end -->
 ## 🚂 Example
 TODO

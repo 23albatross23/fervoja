@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Apr 11 18:32:17 2026
+Created on Sun Apr 12 03:09:01 2026
 
 @author: Álvaro Pauner Argudo
 """
 
-# Copyright (C) 2026  Álvaro Pauner Argudo <railpy.project@gmail.com>
+# Copyright (C) 2026  Álvaro Pauner Argudo <fervoja.project@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
