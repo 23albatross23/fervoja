@@ -20,6 +20,7 @@ Currently, the library includes support for:
 * **EULYNX**: Protocol for controlling and monitoring trackside objects.
     - Planned.
 * **RaSTA** (Rail Safe Transport Application): A secure transport layer for railway applications.
+    - Planned.
 
 ## 🚀 Key Features
 
