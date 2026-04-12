@@ -28,13 +28,11 @@ jobs:
     - name: Run tests and generate coverage report
       run: |
         pytest
-        # Usamos python para generar el reporte y limpiar las rutas de Windows a Linux
         python -m coverage report --format=markdown > coverage_report.md
 
     - name: Update README
-      shell: bash # Forzamos bash incluso en runners de windows si hiciera falta
+      shell: bash
       run: |
-        # Usamos un script de python para inyectar la tabla, que es más seguro que sed entre OS
         python -c "
         import pathlib
         report = pathlib.Path('coverage_report.md').read_text()
