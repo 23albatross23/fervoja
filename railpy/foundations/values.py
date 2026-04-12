@@ -41,7 +41,7 @@ class ValError(Exception):
         self._error_code = error_code
         super().__init__(self.__message)
         
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.__message} (Error Code: {self._error_code})"
 
 class Value(ABC):
