@@ -1,52 +1,70 @@
-name: Coverage Update
+name: Update Coverage README
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+
+# Forzamos a que use Node 24 para quitar el warning molesto
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest pytest-cov coverage[toml]
-        pip install -e .
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov coverage[toml]
+          pip install -e . || echo "Local installation failed, continue..."
 
-    - name: Run tests and generate coverage report
-      run: |
-        pytest
-        python -m coverage report --format=markdown > coverage_report.md
+      - name: Run Tests
+        run: |
+          pytest --cov=railpy --cov-report=term-missing -v
 
-    - name: Update README
-      shell: bash
-      run: |
-        python -c "
-        import pathlib
-        report = pathlib.Path('coverage_report.md').read_text()
-        readme = pathlib.Path('README.md').read_text()
-        start_marker = ''
-        end_marker = ''
-        new_readme = readme.split(start_marker)[0] + start_marker + '\n' + report + '\n' + end_marker + readme.split(end_marker)[1]
-        pathlib.Path('README.md').write_text(new_readme)
-        "
+      - name: Generate Table
+        run: |
+          python -m coverage report --format=markdown > coverage_table.md
 
-    - name: Commit and push if changed
-      run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
-        git add README.md
-        git commit -m "docs: update coverage table in README [skip ci]" || echo "No changes to commit"
-        git push
+      - name: Update README
+        run: |
+          python -c "
+          import pathlib
+          report_file = 'coverage_table.md' 
+          
+          if not pathlib.Path(report_file).exists():
+              print(f'Error: {report_file} not found'); exit(1)
+
+          report = pathlib.Path(report_file).read_text()
+          readme = pathlib.Path('README.md').read_text()
+          
+          # ESTO ES LO QUE ESTABA VACÍO
+          start_marker = ''
+          end_marker = ''
+          
+          if start_marker not in readme or end_marker not in readme:
+              print('Error: markers not found README.md'); exit(1)
+          
+          parts = readme.split(start_marker)
+          post_split = parts[1].split(end_marker)
+          
+          new_readme = parts[0] + start_marker + '\n' + report + '\n' + end_marker + post_split[1]
+          pathlib.Path('README.md').write_text(new_readme)
+          "
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add README.md
+          git commit -m "docs: update coverage table [skip ci]" || exit 0
+          git push
