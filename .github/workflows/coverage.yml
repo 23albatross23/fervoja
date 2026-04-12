@@ -47,9 +47,8 @@ jobs:
           report = pathlib.Path(report_file).read_text()
           readme = pathlib.Path('README.md').read_text()
           
-          # ESTO ES LO QUE ESTABA VACÍO
-          start_marker = ''
-          end_marker = ''
+          start_marker = '<!-- coverage-start -->'
+          end_marker = '<!-- coverage-end -->'
           
           if start_marker not in readme or end_marker not in readme:
               print('Error: markers not found README.md'); exit(1)
