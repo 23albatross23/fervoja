@@ -40,7 +40,7 @@ pip install -e .[test]
 ```
 
 ## 📊 Code coverage
-
+''
 | Name | Stmts | Miss | Branch | BrPart | Cover |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | railpy\foundations\abstractions.py | 3 | 0 | 0 | 0 | 100% |
@@ -49,6 +49,7 @@ pip install -e .[test]
 | railpy\foundations\fields.py | 13 | 0 | 0 | 0 | 100% |
 | railpy\foundations\values.py | 101 | 0 | 22 | 0 | 100% |
 | **TOTAL** | **179** | **0** | **40** | **0** | **100%** |
+''
 
 ## 🚂 Example
 TODO
