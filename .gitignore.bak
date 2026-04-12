@@ -1,9 +1,0 @@
-__pycache__/
-*.py[cod]
-*$py.class
-fervoja_env/
-.pytest_cache/
-.coverage
-.spyproject/
-fervoja.egg-info/
-coverage_table.md
