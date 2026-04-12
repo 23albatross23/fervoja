@@ -40,16 +40,15 @@ pip install -e .[test]
 ```
 
 ## 📊 Code coverage
-''
-| Name | Stmts | Miss | Branch | BrPart | Cover |
+
+`| Name | Stmts | Miss | Branch | BrPart | Cover |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | railpy\foundations\abstractions.py | 3 | 0 | 0 | 0 | 100% |
 | railpy\foundations\containers.py | 51 | 0 | 16 | 0 | 100% |
 | railpy\foundations\dependencies.py | 11 | 0 | 2 | 0 | 100% |
 | railpy\foundations\fields.py | 13 | 0 | 0 | 0 | 100% |
 | railpy\foundations\values.py | 101 | 0 | 22 | 0 | 100% |
-| **TOTAL** | **179** | **0** | **40** | **0** | **100%** |
-''
+| TOTAL | 179 | 0 | 40 | 0 | 100% |
 
 ## 🚂 Example
 TODO
