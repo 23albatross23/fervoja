@@ -31,6 +31,8 @@ class ErrorCode(Enum):
     RANGE = 1
     BIT_SIZE = 2
     DECODE_BUFFER = 3
+    IS_VALID_FUNCTION = 4
+    IS_SPECIAL_FUNCTION = 5
     
 class Endian(Enum):
     BIG = "big"
@@ -67,6 +69,19 @@ class Value(ABC):
             raise ValError(
                 message="Little Endian requires byte-aligned size (multiple of 8)", 
                 error_code=ErrorCode.BIT_SIZE)
+        
+        if is_valid_func is None:
+            raise ValError(
+                message="Function is_valid is None", 
+                error_code=ErrorCode.IS_VALID_FUNCTION)
+        
+        if is_special_funcion is None:
+            raise ValError(
+                message="Function is_special is None", 
+                error_code=ErrorCode.IS_SPECIAL_FUNCTION)
+        
+        self.__is_valid_funcion = is_valid_func
+        self.__is_special_funcion = is_special_func
             
     
     def __check_buffer(self, buffer: int) -> bool:
@@ -85,12 +100,10 @@ class Value(ABC):
         return self.__config.bit_size
     
     def is_valid(self) -> bool:
-        return True if self.__is_valid_funcion == None else\
-            self.__is_valid_funcion(self.__value)
+        return self.__is_valid_funcion(self.__value)
     
     def is_special(self) -> bool:
-        return True if self.__is_special_funcion == None else\
-            self.__is_special_funcion(self.__value)
+        return self.__is_special_funcion(self.__value)
     
     @abstractmethod
     def _unpack_from_int(self, buffer: int):
