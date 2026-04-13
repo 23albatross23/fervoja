@@ -75,7 +75,7 @@ class Value(ABC):
                 message="Function is_valid is None", 
                 error_code=ErrorCode.IS_VALID_FUNCTION)
         
-        if is_special_funcion is None:
+        if is_special_func is None:
             raise ValError(
                 message="Function is_special is None", 
                 error_code=ErrorCode.IS_SPECIAL_FUNCTION)

@@ -39,52 +39,57 @@ class TestIntegerValue:
     def config_i16_le(self):
         return FieldConfig(bit_size=16, endian=Endian.LITTLE)
 
+    @pytest.fixture
+    def default_funcs(self):
+        return {"is_valid_func": lambda x: True, "is_special_func": lambda x: False}
+
     # ==========================================
     # 1. Range tests (2's complement)
     # ==========================================
 
-    def test_range_limits_8bit(self, config_i8_be):
-        val_pos = IntegerValue(value=127, config=config_i8_be)
+    def test_range_limits_8bit(self, config_i8_be, default_funcs):
+        val_pos = IntegerValue(value=127, config=config_i8_be, **default_funcs)
         assert val_pos.get_value() == 127
         
-        val_neg = IntegerValue(value=-128, config=config_i8_be)
+        val_neg = IntegerValue(value=-128, config=config_i8_be, **default_funcs)
         assert val_neg.get_value() == -128
 
-    def test_out_of_range_raises_error(self, config_i8_be):
+    def test_out_of_range_raises_error(self, config_i8_be, default_funcs):
         with pytest.raises(ValError) as exc_info:
-            IntegerValue(value=128, config=config_i8_be)
+            IntegerValue(value=128, config=config_i8_be, **default_funcs)
         assert exc_info.value._error_code == ErrorCode.RANGE
 
         with pytest.raises(ValError) as exc_info:
-            IntegerValue(value=-129, config=config_i8_be)
+            IntegerValue(value=-129, config=config_i8_be, **default_funcs)
         assert exc_info.value._error_code == ErrorCode.RANGE
 
     # ==========================================
     # 2. Decoding and encoding (sign and bits)
     # ==========================================
 
-    def test_decode_positive(self, config_i8_be):
-        val = IntegerValue(value=0, config=config_i8_be)
+    def test_decode_positive(self, config_i8_be, default_funcs):
+        val = IntegerValue(value=0, config=config_i8_be, **default_funcs)
         val.decode(buffer=0x7F)
         assert val.get_value() == 127
 
-    def test_decode_negative(self, config_i8_be):
-        val = IntegerValue(value=0, config=config_i8_be)
+    def test_decode_negative(self, config_i8_be, default_funcs):
+        val = IntegerValue(value=0, config=config_i8_be, **default_funcs)
         val.decode(buffer=0xFF)
         assert val.get_value() == -1
 
-    def test_decode_min_negative(self, config_i8_be):
+    def test_decode_min_negative(self, config_i8_be, default_funcs):
         """0x80 in 8 bits should be -128."""
-        val = IntegerValue(value=0, config=config_i8_be)
+        val = IntegerValue(value=0, config=config_i8_be, **default_funcs)
         val.decode(buffer=0x80) # 1000 0000
         assert val.get_value() == -128
 
     # ==========================================
     # 3. Endianness Tests
     # ==========================================
-    def test_decode_little_endian_negative(self, config_i16_le):
-        val = IntegerValue(value=0, config=config_i16_le)
-        # 0xFEFF in decimal is 65279
+    def test_decode_little_endian_negative(self, config_i16_le, default_funcs):
+        val = IntegerValue(value=0, config=config_i16_le, **default_funcs)
+        # En Little Endian de 16 bits, el buffer 0xFEFF representa los bytes [FF, FE] 
+        # que al interpretarse como signed 16-bit es -2
         val.decode(buffer=0xFEFF)
         assert val.get_value() == -2
 
@@ -92,16 +97,16 @@ class TestIntegerValue:
     # 4. Integrity and typing tests
     # ==========================================
 
-    def test_invalid_type(self, config_i8_be):
-        val = IntegerValue(value=0, config=config_i8_be)
+    def test_invalid_type(self, config_i8_be, default_funcs):
+        val = IntegerValue(value=0, config=config_i8_be, **default_funcs)
         with pytest.raises(ValError) as exc_info:
             val.set_value("10")
         assert exc_info.value._error_code == ErrorCode.TYPE
 
-    def test_encode_persistence_big(self, config_i8_be):
-        val = IntegerValue(value=-50, config=config_i8_be)
+    def test_encode_persistence_big(self, config_i8_be, default_funcs):
+        val = IntegerValue(value=-50, config=config_i8_be, **default_funcs)
         assert val.encode() == 0xCE
         
-    def test_encode_persistence_little(self, config_i16_le):
-        val = IntegerValue(value=-2, config=config_i16_le)
+    def test_encode_persistence_little(self, config_i16_le, default_funcs):
+        val = IntegerValue(value=-2, config=config_i16_le, **default_funcs)
         assert val.encode() == 0xFEFF
