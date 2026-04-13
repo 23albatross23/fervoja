@@ -3,6 +3,8 @@ __pycache__/
 *$py.class
 fervoja_env/
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
 .coverage
 .spyproject/
 fervoja.egg-info/

@@ -5,7 +5,7 @@ Created on Sun Apr 12 01:10:13 2026
 @author: Álvaro Pauner Argudo
 """
 
-# Copyright (C) 2026  Álvaro Pauner Argudo <fervoja.project@gmail.com>
+# Copyright (C) 2026  Álvaro Pauner Argudo <pauner_teceka@hotmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

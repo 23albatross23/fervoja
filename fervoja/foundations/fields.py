@@ -5,7 +5,7 @@ Created on Sat Apr 11 23:36:32 2026
 @author: Álvaro Pauner Argudo
 """
 
-# Copyright (C) 2026  Álvaro Pauner Argudo <fervoja.project@gmail.com>
+# Copyright (C) 2026  Álvaro Pauner Argudo <pauner_teceka@hotmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,12 +26,15 @@ from .abstractions import AbstractDependency, AbstractFieldContainer
 class Field:
     __slots__ = (
         "__value",
-        "__dependencies"
+        "__dependencies",
+        "__iteration"
     )
-    def __init__(self, value : Value, dependencies : tuple[AbstractDependency] = (), 
+    def __init__(self, value : Value, 
+                 dependencies : tuple[AbstractDependency] = tuple(), 
                  iteration : int = 0):
         self.__value = value
         self.__dependencies = dependencies
+        self.__iteration = iteration
         
     def __str__(self) -> str:
         return f"{self.__value.get_value()}"
@@ -41,3 +44,6 @@ class Field:
     
     def get_value(self) -> Value:
         return self.__value
+    
+    def get_iteration(self) -> int:
+        return self.__iteration

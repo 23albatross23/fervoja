@@ -7,7 +7,7 @@ Created on Sat Apr 11 18:26:18 2026
 Module defining the value classes.
 """
 
-# Copyright (C) 2026  Álvaro Pauner Argudo <fervoja.project@gmail.com>
+# Copyright (C) 2026  Álvaro Pauner Argudo <pauner_teceka@hotmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ Module defining the value classes.
 
 from abc import ABC, abstractmethod
 from enum import Enum
+from dataclasses import dataclass
 
 class ErrorCode(Enum):
     TYPE = 0
@@ -34,9 +35,15 @@ class ErrorCode(Enum):
 class Endian(Enum):
     BIG = "big"
     LITTLE = "little"
+    
+@dataclass(frozen=True, slots=True)
+class FieldConfig:
+    '''Flyweight object'''
+    bit_size: int
+    endian: Endian
 
 class ValError(Exception):
-    def __init__(self, message : str, error_code : ErrorCode):
+    def __init__(self, message: str, error_code: ErrorCode):
         self.__message = message
         self._error_code = error_code
         super().__init__(self.__message)
@@ -48,38 +55,47 @@ class Value(ABC):
     '''Root class for the diferent field kinds'''
     __slots__ = (
         "__value",
-        "__bit_size",
-        "__endian",
+        "__config",
+        "__is_valid_funcion",
+        "__is_special_funcion",
     )
-    def __init__(self, bit_size : int, endian : Endian):
+    def __init__(self, config: FieldConfig, is_valid_func=None, is_special_func=None):
         self.__value = 0
-        self.__bit_size = bit_size
-        if (endian == Endian.LITTLE) and ((bit_size % 8) != 0):
+        self.__config = config
+        if (self.__config.endian == Endian.LITTLE) and\
+            ((self.__config.bit_size % 8) != 0):
             raise ValError(
                 message="Little Endian requires byte-aligned size (multiple of 8)", 
                 error_code=ErrorCode.BIT_SIZE)
-        self.__endian = endian
             
     
-    def __check_buffer(self, buffer : int) -> bool:
-        return buffer.bit_length() <= self.__bit_size
+    def __check_buffer(self, buffer: int) -> bool:
+        return buffer.bit_length() <= self.__config.bit_size
     
-    def _set_value(self, value : int):
+    def _set_value(self, value: int):
         self.__value = value
         
     def _get_value(self) -> int:
         return self.__value
     
     def _get_endian(self) -> Endian:
-        return self.__endian
+        return self.__config.endian
+    
+    def get_size(self) -> int:
+        return self.__config.bit_size
+    
+    def is_valid(self) -> bool:
+        return True if self.__is_valid_funcion == None else\
+            self.__is_valid_funcion(self.__value)
+    
+    def is_special(self) -> bool:
+        return True if self.__is_special_funcion == None else\
+            self.__is_special_funcion(self.__value)
     
     @abstractmethod
     def _unpack_from_int(self, buffer: int):
         '''Template method for decoding the correct value to be set according the type'''
         pass
-    
-    def get_size(self) -> int:
-        return self.__bit_size
     
     @abstractmethod
     def get_value(self):
@@ -93,7 +109,7 @@ class Value(ABC):
     def encode(self) -> int:
         pass
     
-    def decode(self, buffer : int):
+    def decode(self, buffer: int):
         if not self.__check_buffer(buffer=buffer):
             raise ValError(
                 message="Buffer value exceeds bit size capacity",
@@ -103,16 +119,22 @@ class Value(ABC):
 
 class NumericalValue(Value):
     __slots__ = ()
-    def __init__(self, bit_size : int, endian : Endian):
-        super().__init__(bit_size=bit_size, endian=endian)
+    def __init__(self, config: FieldConfig, is_valid_func=None, is_special_func=None):
+        super().__init__(
+            config=config, 
+            is_valid_func=is_valid_func, 
+            is_special_func=is_special_func)
     
     def get_value(self) -> int:
         return self._get_value()
         
 class NaturalValue(NumericalValue):
     __slots__ = ()
-    def __init__(self, value : int, bit_size : int, endian : Endian):
-        super().__init__(bit_size=bit_size, endian=endian)
+    def __init__(self, value: int, config: FieldConfig, is_valid_func=None, is_special_func=None):
+        super().__init__(
+            config=config, 
+            is_valid_func=is_valid_func, 
+            is_special_func=is_special_func)
         self.set_value(value)
         
     def _unpack_from_int(self, buffer: int):
@@ -124,7 +146,7 @@ class NaturalValue(NumericalValue):
             swapped_value = int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
             self.set_value(value=swapped_value)
      
-    def set_value(self, value : int):
+    def set_value(self, value: int):
         if not isinstance(value, int):
             raise ValError(message="Value must be an int type", error_code=ErrorCode.TYPE)
         if value >= 0:
@@ -145,8 +167,11 @@ class NaturalValue(NumericalValue):
 class IntegerValue(NumericalValue):
     '''2's complement decoding'''
     __slots__ = ()
-    def __init__(self, value : int, bit_size : int, endian : Endian):
-        super().__init__(bit_size=bit_size, endian=endian)
+    def __init__(self, value: int, config: FieldConfig, is_valid_func=None, is_special_func=None):
+        super().__init__(
+            config=config, 
+            is_valid_func=is_valid_func, 
+            is_special_func=is_special_func)
         self.set_value(value)
         
     def _unpack_from_int(self, buffer: int):

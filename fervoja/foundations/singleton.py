@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Apr 11 18:32:17 2026
+Created on Mon Apr 13 20:27:36 2026
 
 @author: Álvaro Pauner Argudo
 """
@@ -19,3 +19,23 @@ Created on Sat Apr 11 18:32:17 2026
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+from threading import Lock, Thread
+
+
+class SingletonMeta(type):
+    """
+    This is a thread-safe implementation of Singleton.
+    Copied from https://refactoring.guru/design-patterns/singleton/python/example#example-1
+    """
+
+    _instances = {}
+
+    _lock: Lock = Lock()
+
+    def __call__(cls, *args, **kwargs):
+        with cls._lock:
+            if cls not in cls._instances:
+                instance = super().__call__(*args, **kwargs)
+                cls._instances[cls] = instance
+        return cls._instances[cls]

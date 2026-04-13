@@ -5,7 +5,7 @@ Created on Sat Apr 11 23:38:05 2026
 @author: Álvaro Pauner Argudo
 """
 
-# Copyright (C) 2026  Álvaro Pauner Argudo <fervoja.project@gmail.com>
+# Copyright (C) 2026  Álvaro Pauner Argudo <pauner_teceka@hotmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,6 +39,6 @@ class Dependency(AbstractDependency):
     
     def is_dependency_fulfilled(self, container : AbstractFieldContainer) -> bool:
         result = True
-        if self.__condition != None:
+        if self.__condition is not None:
             result = self.__condition(container[self.__depends_on].get_value())
         return result

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Apr 11 18:32:17 2026
+Created on Sun Apr 12 22:15:55 2026
 
 @author: Álvaro Pauner Argudo
 """
@@ -19,3 +19,12 @@ Created on Sat Apr 11 18:32:17 2026
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+from enum import Enum
+
+class UnisigInterfaces(Enum):
+    TRAIN_TO_TRACK = "TRAIN_TO_TRACK"
+    TRACK_TO_TRAIN = "TRACK_TO_TRAIN"
+    RBC_TO_RBC = "RBC_TO_RBC"
+    EUROBALISE = "EUROBALISE"
+    EUROLOOP = "EUROLOOP"

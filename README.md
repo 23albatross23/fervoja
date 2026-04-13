@@ -11,7 +11,7 @@ The main goal is to provide a unified and lightweight interface to work with cri
 
 Currently, the library includes support for:
 
-* **UNISIG**: Standard messaging for ETCS/ERTMS systems.
+* **UNISIG (BSL 3.6.0)**: Standard messaging for ETCS/ERTMS systems.
     - Train To Track: working
     - Track To Train: planned
     - Euroloop: planned
