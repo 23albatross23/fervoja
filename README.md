@@ -41,16 +41,21 @@ pip install -e .[test]
 
 ## 📊 Code coverage
 <!-- coverage-start -->
-| Name                                |    Stmts |     Miss |   Branch |   BrPart |    Cover |
-|------------------------------------ | -------: | -------: | -------: | -------: | -------: |
-| fervoja/foundations/abstractions.py |        3 |        0 |        0 |        0 |     100% |
-| fervoja/foundations/containers.py   |       51 |        0 |       16 |        0 |     100% |
-| fervoja/foundations/dependencies.py |       11 |        0 |        2 |        0 |     100% |
-| fervoja/foundations/fields.py       |       13 |        0 |        0 |        0 |     100% |
-| fervoja/foundations/values.py       |      101 |        0 |       22 |        0 |     100% |
-| **TOTAL**                           |  **179** |    **0** |   **40** |    **0** | **100%** |
+| Name                                                     |    Stmts |     Miss |   Branch |   BrPart |   Cover |
+|--------------------------------------------------------- | -------: | -------: | -------: | -------: | ------: |
+| fervoja/application\_layer/unisig/interfaces.py          |        7 |        7 |        0 |        0 |      0% |
+| fervoja/application\_layer/unisig/variables/names.py     |      226 |      226 |        0 |        0 |      0% |
+| fervoja/application\_layer/unisig/variables/sizes.py     |       18 |       18 |        0 |        0 |      0% |
+| fervoja/application\_layer/unisig/variables/variables.py |       72 |       72 |       16 |        0 |      0% |
+| fervoja/foundations/abstractions.py                      |        3 |        0 |        0 |        0 |    100% |
+| fervoja/foundations/containers.py                        |       51 |        0 |       16 |        0 |    100% |
+| fervoja/foundations/dependencies.py                      |       11 |        0 |        2 |        0 |    100% |
+| fervoja/foundations/fields.py                            |       16 |        1 |        0 |        0 |     94% |
+| fervoja/foundations/singleton.py                         |       10 |       10 |        2 |        0 |      0% |
+| fervoja/foundations/values.py                            |      109 |        2 |       22 |        0 |     98% |
+| **TOTAL**                                                |  **523** |  **336** |   **58** |    **0** | **39%** |
 
-9 empty files skipped.
+12 empty files skipped.
 
 <!-- coverage-end -->
 ## 🚂 Example
