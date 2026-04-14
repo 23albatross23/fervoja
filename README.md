@@ -52,8 +52,8 @@ pip install -e .[test]
 | fervoja/foundations/dependencies.py                      |       11 |        0 |        2 |        0 |    100% |
 | fervoja/foundations/fields.py                            |       16 |        1 |        0 |        0 |     94% |
 | fervoja/foundations/singleton.py                         |       10 |        0 |        2 |        1 |     92% |
-| fervoja/foundations/values.py                            |      151 |       16 |       34 |        2 |     88% |
-| **TOTAL**                                                |  **675** |   **24** |   **84** |    **3** | **96%** |
+| fervoja/foundations/values.py                            |      149 |        0 |       34 |        0 |    100% |
+| **TOTAL**                                                |  **673** |    **8** |   **84** |    **1** | **99%** |
 
 12 empty files skipped.
 
