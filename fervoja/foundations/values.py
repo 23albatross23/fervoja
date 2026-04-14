@@ -245,12 +245,17 @@ class HexadecimalValue(Value):
         self.set_value(value)
     
     def _unpack_from_int(self, buffer: int):
-        if self._get_endian() == Endian.BIG or self.get_size() <= 8:
-            logical_value = buffer
-        else:
+        logical_value = buffer
+        if self._get_endian() == Endian.LITTLE:
             byte_count = self.get_size() // 8
-            raw_bytes = buffer.to_bytes(byte_count, byteorder=Endian.BIG.value)
-            logical_value = int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
+            raw_bytes = buffer.to_bytes(
+                byte_count, 
+                byteorder=Endian.BIG.value
+            )
+            logical_value = int.from_bytes(
+                raw_bytes, 
+                byteorder=Endian.LITTLE.value
+            )
         
         self._set_value(logical_value)
     
@@ -277,14 +282,10 @@ class HexadecimalValue(Value):
         self._set_value(logical_value)
     
     def encode(self) -> int:
-        logical_value = self._get_value()
-        result = 0
-        
-        if self._get_endian() != Endian.BIG or self.get_size() > 8:
+        result = self._get_value()
+        if self._get_endian() == Endian.LITTLE:
             byte_count = self.get_size() // 8
-            raw_bytes = logical_value.to_bytes(byte_count, byteorder=Endian.BIG.value)
+            raw_bytes = result.to_bytes(byte_count, byteorder=Endian.BIG.value)
             result = int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
-        else:
-            result = logical_value
             
         return result

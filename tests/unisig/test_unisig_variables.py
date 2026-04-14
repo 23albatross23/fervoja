@@ -20,6 +20,7 @@ Created on Tue Apr 14 07:46:13 2026
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from copy import deepcopy
 import pytest
 from fervoja.application_layer.unisig.variables.variables import Factory
 from fervoja.application_layer.unisig.variables import names
@@ -205,31 +206,25 @@ def generate_boundary_data():
 
 @pytest.mark.parametrize("var_name, valid_min, valid_max, special_min, special_max", generate_boundary_data())
 def test_factory_variables_boundaries(factory, var_name, valid_min, valid_max, special_min, special_max):
-    # 1. Probar Valor Válido Mínimo
     if valid_min is not None:
         val_min = factory.create(var_name, valid_min)
         assert val_min.is_valid() is True
 
-    # 2. Probar Valor Válido Máximo
     if valid_max is not None:
         val_max = factory.create(var_name, valid_max)
         assert val_max.is_valid() is True
 
-    # 3. Probar Valor Especial Mínimo
     if special_min is not None:
         s_min = factory.create(var_name, special_min)
         assert s_min.is_special() is True
 
-    # 4. Probar Valor Especial Máximo
     if special_max is not None:
         s_max = factory.create(var_name, special_max)
         assert s_max.is_special() is True
 
-    # 5. Comprobación cruzada opcional: Si hay valores normales y especiales separados, 
-    # asegurar que el mínimo válido no es detectado como especial
     if valid_min is not None and special_min is not None and valid_min != special_min:
         val_normal = factory.create(var_name, valid_min)
-        assert val_normal.is_special() is False
+        assert val_normal.is_special() is False    
         
 def test_unknown_variable(factory):
     UNKNOWN = "UNKNOWN"
