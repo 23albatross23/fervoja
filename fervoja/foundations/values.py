@@ -46,8 +46,8 @@ class FieldConfig:
 
 class ValError(Exception):
     def __init__(self, message: str, error_code: ErrorCode):
-        self.__message = message
-        self._error_code = error_code
+        self.__message: str = message
+        self._error_code: ErrorCode = error_code
         super().__init__(self.__message)
         
     def __str__(self) -> str:
@@ -62,8 +62,8 @@ class Value(ABC):
         "__is_special_funcion",
     )
     def __init__(self, config: FieldConfig, is_valid_func=None, is_special_func=None):
-        self.__value = 0
-        self.__config = config
+        self.__value: int = 0
+        self.__config: FieldConfig = config
         if (self.__config.endian == Endian.LITTLE) and\
             ((self.__config.bit_size % 8) != 0):
             raise ValError(
@@ -100,10 +100,10 @@ class Value(ABC):
         return self.__config.bit_size
     
     def is_valid(self) -> bool:
-        return self.__is_valid_funcion(self.__value)
+        return self.__is_valid_funcion(self.get_value())
     
     def is_special(self) -> bool:
-        return self.__is_special_funcion(self.__value)
+        return self.__is_special_funcion(self.get_value())
     
     @abstractmethod
     def _unpack_from_int(self, buffer: int):
@@ -231,5 +231,60 @@ class IntegerValue(NumericalValue):
             return int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
             
         return unsigned_value
-
     
+class HexadecimalValue(Value):
+    __slots__ = ("__fill")
+    __ALLOWED = set("0123456789abcdefABCDEF")
+    
+    def __init__(self, value: str, config: FieldConfig, is_valid_func=None, is_special_func=None):
+        super().__init__(
+            config=config, 
+            is_valid_func=is_valid_func, 
+            is_special_func=is_special_func
+        )
+        self.set_value(value)
+    
+    def _unpack_from_int(self, buffer: int):
+        if self._get_endian() == Endian.BIG or self.get_size() <= 8:
+            logical_value = buffer
+        else:
+            byte_count = self.get_size() // 8
+            raw_bytes = buffer.to_bytes(byte_count, byteorder=Endian.BIG.value)
+            logical_value = int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
+        
+        self._set_value(logical_value)
+    
+    def get_value(self) -> str:
+        logical_value = self._get_value()
+        hex_chars = (self.get_size() + 3) // 4
+        return f"{logical_value:0{hex_chars}X}"
+    
+    def set_value(self, value: str):
+        if not isinstance(value, str) or not set(value).issubset(self.__ALLOWED):
+            raise ValError(
+                message="Value must be a hex string", 
+                error_code=ErrorCode.TYPE
+            )
+            
+        max_chars = (self.get_size() + 3) // 4
+        if len(value) > max_chars:
+            raise ValError(
+                message=f"Hex string '{value}' exceeds maximum length for {self.get_size()} bits", 
+                error_code=ErrorCode.RANGE
+            )
+        
+        logical_value = int(value, 16)
+        self._set_value(logical_value)
+    
+    def encode(self) -> int:
+        logical_value = self._get_value()
+        result = 0
+        
+        if self._get_endian() != Endian.BIG or self.get_size() > 8:
+            byte_count = self.get_size() // 8
+            raw_bytes = logical_value.to_bytes(byte_count, byteorder=Endian.BIG.value)
+            result = int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
+        else:
+            result = logical_value
+            
+        return result

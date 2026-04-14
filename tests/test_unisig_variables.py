@@ -187,15 +187,18 @@ def generate_boundary_data():
     # p_24_1 (24 bits, val < 10000000, spec == 16777215)
     add([names.M_POSITION], 0, 9999999, 16777215, 16777215)
     # p_24_2 (24 bits, val all, spec None)
-    add([names.NID_ENGINE, names.NID_MN], 0, 16777215, None, None)
+    add([names.NID_ENGINE], 0, 16777215, None, None)
     # p_24_3 (24 bits, val all, spec 16777215)
     add([names.NID_LRBG, names.NID_LTRBG, names.NID_PRVLRBG], 0, 16777215, 16777215, 16777215)
-
+    # p_24_4 (24 bits, val all, spec BCD)
+    add([names.NID_MN], "FFFFF0", "999999", None, None)
     # p_32_1 (32 bits, val all, spec 4294967295)
-    add([names.NID_OPERATIONAL, names.T_TRAIN], 0, 4294967295, 4294967295, 4294967295)
+    add([names.T_TRAIN], 0, 4294967295, 4294967295, 4294967295)
 
-    # p_64_1 (64 bits, val all, spec max)
-    add([names.NID_RADIO], 0, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF)
+    # p_32_2 (32 bits, val all, spec BCD)
+    add([names.NID_OPERATIONAL], "FFFFFFF0", "99999999", None, None)
+    # p_64_1 (64 bits, val all, BCD)
+    add([names.NID_RADIO], "FFFFFFFFFFFFFFF0", "FFFFFFFFFFFFFFFF", "FFFFFFFFFFFFFFFF", "FFFFFFFFFFFFFFFF")
 
     return data
 
@@ -227,3 +230,9 @@ def test_factory_variables_boundaries(factory, var_name, valid_min, valid_max, s
     if valid_min is not None and special_min is not None and valid_min != special_min:
         val_normal = factory.create(var_name, valid_min)
         assert val_normal.is_special() is False
+        
+def test_unknown_variable(factory):
+    UNKNOWN = "UNKNOWN"
+    with pytest.raises(ValueError) as exc_info:
+        factory.create(UNKNOWN, 0)
+    assert f"Undefined variable {UNKNOWN}." == str(exc_info.value)

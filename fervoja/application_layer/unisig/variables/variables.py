@@ -33,6 +33,12 @@ class Factory(metaclass=singleton.SingletonMeta):
     def __init__(self):
         self.__blueprints: Dict[str, Dict[str, Any]] = {}
         
+        is_valid_bcd = lambda x: (
+            not set(x).intersection("abcdeABCDE") and
+            "f" not in x.lstrip("Ff").lower() and
+            bool(x.lstrip("Ff"))
+        )
+        
         p_1_1 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_1, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: True}
         
         p_2_1 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_2, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: True}
@@ -99,10 +105,19 @@ class Factory(metaclass=singleton.SingletonMeta):
         
         p_24_1 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_24, IS_VALID: lambda x: x < 10000000 or x == 16777215, IS_SPECIAL: lambda x: x == 16777215}
         p_24_2 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_24, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: False}
-        p_24_3 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_24, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: x == 16777215}
-        
+        p_24_3 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_24, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: x == 16777215}        
+        p_24_4 = {CLS: values.HexadecimalValue, CONFIG: sizes.BIT_24, IS_VALID: is_valid_bcd, IS_SPECIAL: lambda x: False}
         
         p_32_1 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_32, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: x == 4294967295}
+        p_32_2 = {CLS: values.HexadecimalValue, CONFIG: sizes.BIT_32, IS_VALID: is_valid_bcd, IS_SPECIAL: lambda x: False}
+        
+        p_64_1 = {
+            CLS: values.HexadecimalValue, 
+            CONFIG: sizes.BIT_64, 
+            IS_VALID: lambda x: (
+                not set(x).intersection("abcdeABCDE") and
+                "f" not in x.lstrip("Ff").lower()),
+            IS_SPECIAL: lambda x: x=="F"*16}
         
         #A
         for var in [names.A_NVMAXREDADH1, names.A_NVMAXREDADH2, names.A_NVMAXREDADH3]: #, 
@@ -203,14 +218,11 @@ class Factory(metaclass=singleton.SingletonMeta):
         self.__blueprints[names.NID_LTRBG] = p_24_3
         self.__blueprints[names.NID_LX] = p_8_7
         self.__blueprints[names.NID_MESSAGE] = p_8_2
-        #TODO: new Value type NID_MN is BCD
-        # self.__blueprints[names.NID_MN] = 
-        #TODO: new Value type NID_OPERATIONAL is BCD
-        # self.__blueprints[names.NID_OPERATIONAL] = 
+        self.__blueprints[names.NID_MN] = p_24_4
+        self.__blueprints[names.NID_OPERATIONAL] = p_32_2
         self.__blueprints[names.NID_PACKET] = p_8_2
         self.__blueprints[names.NID_PRVLRBG] = p_24_3
-        #TODO: new Value type NID_RADIO is BCD
-        # self.__blueprints[names.NID_RADIO] = p_64_1
+        self.__blueprints[names.NID_RADIO] = p_64_1
         self.__blueprints[names.NID_RBC] = p_14_1
         self.__blueprints[names.NID_RIU] = p_14_2
         self.__blueprints[names.NID_NTC] = p_8_2
