@@ -5,8 +5,8 @@
 - [ ] **Edge cases:** (e.g., Tested with Big Endian and Little Endian in HexadecimalValue)
 
 **Test results summary:**
-```Automatically updated after a pull request.
-```
+Automatically updated after a pull request.
+
 ## 📸 Screenshots / Logs
 ## 🔗 Linking to Issues
 Fixes # (issue number it solves)
