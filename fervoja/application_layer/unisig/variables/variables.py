@@ -62,9 +62,12 @@ class Factory(metaclass=singleton.SingletonMeta):
         p_6_2 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_6, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: False}
         
         p_7_1 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_7, IS_VALID: lambda x: x < 13, IS_SPECIAL: lambda x: 0 <= x <= 12}
-        p_7_2 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_7, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: 121 <= x <= 127}
+        p_7_2 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_7, IS_VALID: lambda x: x < 121, IS_SPECIAL: lambda x: False}
         p_7_3 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_7, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: False}
         p_7_4 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_7, IS_VALID: lambda x: x < 0b0010010 or x > 0b0011111, IS_SPECIAL: lambda x: x < 0b0010010 or x > 0b0011111}
+        p_7_5 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_7, IS_VALID: lambda x: x < 121, IS_SPECIAL: lambda x: x == 0}
+        p_7_6 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_7, IS_VALID: lambda x: x < 121, IS_SPECIAL: lambda x: x == 127}
+        p_7_7 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_7, IS_VALID: lambda x: x < 121, IS_SPECIAL: lambda x: x >= 126}
         
         p_8_1 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_8, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: x == 255}
         p_8_2 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_8, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: False}
@@ -94,9 +97,12 @@ class Factory(metaclass=singleton.SingletonMeta):
         
         p_16_1 = {CLS: values.IntegerValue, CONFIG: sizes.BIT_16, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: False}
         
-        p_24_1 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_24, IS_VALID: lambda x: x < 10000000, IS_SPECIAL: lambda x: x == 16777215}
+        p_24_1 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_24, IS_VALID: lambda x: x < 10000000 or x == 16777215, IS_SPECIAL: lambda x: x == 16777215}
         p_24_2 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_24, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: False}
         p_24_3 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_24, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: x == 16777215}
+        
+        
+        p_32_1 = {CLS: values.NaturalValue, CONFIG: sizes.BIT_32, IS_VALID: lambda x: True, IS_SPECIAL: lambda x: x == 4294967295}
         
         #A
         for var in [names.A_NVMAXREDADH1, names.A_NVMAXREDADH2, names.A_NVMAXREDADH3]: #, 
@@ -240,24 +246,30 @@ class Factory(metaclass=singleton.SingletonMeta):
         self.__blueprints[names.Q_TEXT] = p_8_8
         self.__blueprints[names.Q_SSCODE] = p_4_9
 
-        # for var in [names.T_CYCLOC, names.T_CYCRQST, names.T_LSSMA, names.T_MAR, names.T_NVCONTACT,
-        #             names.T_NVOVTRP, names.T_VBC]:
-        #     self.__blueprints[var] = p_8_1
+        for var in [names.T_CYCLOC, names.T_CYCRQST, names.T_MAR, names.T_NVCONTACT]:
+            self.__blueprints[var] = p_8_1
 
-        # for var in [names.T_EMA, names.T_ENDTIMER, names.T_OL, names.T_SECTIONTIMER, 
-        #             names.T_TEXTDISPLAY, names.T_TIMEOUTRQST]:
-        #     self.__blueprints[var] = p_10_4
+        for var in [names.T_LSSMA, names.T_NVOVTRP, names.T_VBC]:
+            self.__blueprints[var] = p_8_2
+        for var in [names.T_EMA, names.T_ENDTIMER, names.T_OL, names.T_SECTIONTIMER, 
+                    names.T_TEXTDISPLAY, names.T_TIMEOUTRQST]:
+            self.__blueprints[var] = p_10_3
 
-        # self.__blueprints[names.T_TRAIN] = p_32_2
+        self.__blueprints[names.T_TRAIN] = p_32_1
 
-        # for var in [names.V_AXLELOAD, names.V_DIFF, names.V_EMA, names.V_LX, names.V_MAIN,
-        #             names.V_MAMODE, names.V_MAXTRAIN, names.V_NVALLOWOVTRP, names.V_NVKVINT,
-        #             names.V_NVLIMSUPERV, names.V_NVONSIGHT, names.V_NVREL, names.V_NVSUPOVTRP,
-        #             names.V_NVSHUNT, names.V_NVSTFF, names.V_NVUNFIT, names.V_RELEASEDP,
-        #             names.V_RELEASEOL, names.V_REVERSE, names.V_STATIC, names.V_TRAIN, names.V_TSR]:
-        #     self.__blueprints[var] = p_7_2
+        for var in [names.V_AXLELOAD, names.V_DIFF, names.V_EMA, names.V_LX, 
+                    names.V_MAXTRAIN, names.V_NVALLOWOVTRP, names.V_NVKVINT,
+                    names.V_NVLIMSUPERV, names.V_NVONSIGHT, names.V_NVREL, names.V_NVSUPOVTRP,
+                    names.V_NVSHUNT, names.V_NVSTFF, names.V_NVUNFIT, 
+                    names.V_REVERSE, names.V_TRAIN, names.V_TSR]:
+            self.__blueprints[var] = p_7_2
 
-        # self.__blueprints[names.X_TEXT] = p_8_2
+        self.__blueprints[names.V_MAIN] = p_7_5
+        self.__blueprints[names.V_MAMODE] = p_7_6
+        self.__blueprints[names.V_STATIC] = p_7_6
+        self.__blueprints[names.V_RELEASEDP] = p_7_7
+        self.__blueprints[names.V_RELEASEOL] = p_7_7
+        self.__blueprints[names.X_TEXT] = p_8_2
 
     def create(self, name: str, value: int = 0) -> values.Value:
         blueprint = self.__blueprints.get(name)

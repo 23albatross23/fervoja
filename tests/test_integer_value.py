@@ -88,8 +88,6 @@ class TestIntegerValue:
     # ==========================================
     def test_decode_little_endian_negative(self, config_i16_le, default_funcs):
         val = IntegerValue(value=0, config=config_i16_le, **default_funcs)
-        # En Little Endian de 16 bits, el buffer 0xFEFF representa los bytes [FF, FE] 
-        # que al interpretarse como signed 16-bit es -2
         val.decode(buffer=0xFEFF)
         assert val.get_value() == -2
 
