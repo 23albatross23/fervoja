@@ -7,7 +7,7 @@ Created on Sat Apr 11 18:26:18 2026
 Module defining the value classes.
 """
 
-# Copyright (C) 2026  Álvaro Pauner Argudo <pauner_teceka@hotmail.com>
+# Copyright (C) 2026  Álvaro Pauner Argudo <alvaro.pauner@outlook.es>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

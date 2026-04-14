@@ -5,7 +5,7 @@ Created on Sun Apr 12 03:08:52 2026
 @author: Álvaro Pauner Argudo
 """
 
-# Copyright (C) 2026  Álvaro Pauner Argudo <pauner_teceka@hotmail.com>
+# Copyright (C) 2026  Álvaro Pauner Argudo <alvaro.pauner@outlook.es>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

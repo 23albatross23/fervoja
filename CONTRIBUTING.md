@@ -13,7 +13,7 @@ First off, thank you for considering contributing to this railway protocol messa
 
 ## Code of Conduct
 
-By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md). Please report any unacceptable behavior to **pauner_teceka@hotmail.com**.
+By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md). Please report any unacceptable behavior to **alvaro.pauner@outlook.es**.
 
 ## How Can I Contribute?
 
