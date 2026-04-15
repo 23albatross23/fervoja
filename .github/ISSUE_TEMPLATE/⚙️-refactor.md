@@ -2,7 +2,7 @@
 name: "⚙️ Refactor"
 about: code changes that neither fix a bug nor add a feature
 title: "[⚙️]"
-labels: ''
+labels: enhancement
 assignees: ''
 
 ---
