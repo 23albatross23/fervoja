@@ -65,12 +65,13 @@ class FieldContainer(AbstractFieldContainer):
     def decode_bin(self, buffer : int, expected_size: int):
         current_pos = expected_size
         for field_name, field in self.__fields.items():
-            field_val = field.get_value()
-            field_size = field_val.get_size()
-            current_pos -= field_size
-            mask = (1 << field_size) - 1
-            field_buffer = (buffer >> current_pos) & mask
-            field_val.decode(buffer=field_buffer)
+            if field.exists(container=self):
+                field_val = field.get_value()
+                field_size = field_val.get_size()
+                current_pos -= field_size
+                mask = (1 << field_size) - 1
+                field_buffer = (buffer >> current_pos) & mask
+                field_val.decode(buffer=field_buffer)
     
     def encode_bin(self) -> int:
         buffer = 0
