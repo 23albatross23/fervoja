@@ -50,12 +50,12 @@ pip install -e .[test]
 | fervoja/application\_layer/unisig/variables/sizes.py     |       20 |        0 |        0 |        0 |    100% |
 | fervoja/application\_layer/unisig/variables/variables.py |      180 |        0 |       30 |        0 |    100% |
 | fervoja/foundations/abstractions.py                      |        3 |        0 |        0 |        0 |    100% |
-| fervoja/foundations/containers.py                        |       51 |        0 |       16 |        0 |    100% |
+| fervoja/foundations/containers.py                        |       64 |       13 |       18 |        0 |     82% |
 | fervoja/foundations/dependencies.py                      |       11 |        0 |        2 |        0 |    100% |
 | fervoja/foundations/fields.py                            |       16 |        1 |        0 |        0 |     94% |
 | fervoja/foundations/singleton.py                         |       10 |        0 |        2 |        1 |     92% |
 | fervoja/foundations/values.py                            |      149 |        0 |       34 |        0 |    100% |
-| **TOTAL**                                                |  **725** |   **60** |   **86** |    **1** | **92%** |
+| **TOTAL**                                                |  **738** |   **73** |   **88** |    **1** | **91%** |
 
 10 empty files skipped.
 
