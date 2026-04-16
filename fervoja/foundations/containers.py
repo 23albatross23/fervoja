@@ -24,6 +24,7 @@ from collections import OrderedDict
 from collections.abc import Iterator
 from .abstractions import AbstractFieldContainer
 from .fields import Field
+from .values import Endian
 
 class ContainerError(Exception):
     pass
@@ -62,16 +63,14 @@ class FieldContainer(AbstractFieldContainer):
         return sum(field.get_value().get_size() for _, field in self.items())
     
     def decode_bin(self, buffer : int, expected_size: int):
-        current_buffer_size = expected_size
+        current_pos = expected_size
         for field_name, field in self.__fields.items():
-            if field.exists(container=self):
-                field_size = field.get_value().get_size()
-                shift = current_buffer_size - field_size
-                mask = (1 << field_size) - 1
-                field_buffer = (buffer >> shift) & mask
-                field.get_value().decode(buffer=field_buffer)
-                current_buffer_size = shift
-                buffer &= ((1 << shift) - 1)
+            field_val = field.get_value()
+            field_size = field_val.get_size()
+            current_pos -= field_size
+            mask = (1 << field_size) - 1
+            field_buffer = (buffer >> current_pos) & mask
+            field_val.decode(buffer=field_buffer)
     
     def encode_bin(self) -> int:
         buffer = 0
@@ -84,13 +83,28 @@ class FieldContainer(AbstractFieldContainer):
         return buffer
     
     def decode_hex(self, buffer : str):
-        pass #TODO
+        bit_length = len(buffer) * 4
+        if bit_length % 8 != 0:
+            raise ContainerError(
+                "Decoding a hex string requires byte-aligned size (multiple of 8)"
+            )
+        
+        binary: int = int(buffer, 16)
+        self.decode_bin(buffer=binary, expected_size=bit_length)
     
     def encode_hex(self) -> str:
-        pass #TODO
+        hex_length = self.get_size() // 4
+        binary = self.encode_bin()
+        return f"{binary:0{hex_length}X}"
     
-    def decode_byte_array(self, buffer : bytearray):
-        pass #TODO
+    def decode_byte_array(self, buffer : bytes):
+        length: int = len(buffer) * 8
+        binary: int = int.from_bytes(buffer, byteorder=Endian.BIG.value)
+        self.decode_bin(buffer=binary, expected_size=length)
     
-    def encode_byte_array(self) -> bytearray:
-        pass #TODO
+    def encode_byte_array(self) -> bytes:
+        length = self.get_size() // 8
+        return self.encode_bin().to_bytes(
+            length=length, 
+            byteorder=Endian.BIG.value
+        )
