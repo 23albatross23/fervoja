@@ -23,7 +23,32 @@ Created on Sun Apr 12 02:30:27 2026
 import pytest
 from unittest.mock import MagicMock
 from collections import OrderedDict
+from collections.abc import Iterator
 from fervoja.foundations.containers import FieldContainer, ContainerError
+from fervoja.foundations.fields import Field
+
+class ConcreteFieldContainer(FieldContainer):
+    def _extra__str__(self) -> str:
+        return ""
+
+    def _extra_items(self):
+        yield from ()
+
+    def _extra_decode_bin(self, buffer: int, expected_size: int):
+        pass
+    
+class ExtraFieldContainer(FieldContainer):
+    def _extra__str__(self) -> str:
+        return "EXTRA_INFO: 123"
+
+    def _extra_items(self) -> Iterator[tuple[str, Field]]:
+        f_extra = MagicMock()
+        f_extra.get_value().get_size.return_value = 8
+        f_extra.get_value().encode.return_value = 0xAA
+        yield "EXTRA_FIELD", f_extra
+
+    def _extra_decode_bin(self, buffer: int, expected_size: int):
+        self.extra_decoded = (buffer, expected_size)
 
 class TestFieldContainer:
 
@@ -50,7 +75,7 @@ class TestFieldContainer:
 
     @pytest.fixture
     def container(self, mock_fields):
-        return FieldContainer(fields=mock_fields)
+        return ConcreteFieldContainer(fields=mock_fields)
 
     def test_getitem_returns_field(self, container, mock_fields):
         assert container["FIELD_1"] is mock_fields["FIELD_1"]
@@ -88,7 +113,7 @@ class TestFieldContainer:
         assert len(container) == 1
 
     def test_len_empty_container(self):
-        empty_container = FieldContainer(fields=OrderedDict())
+        empty_container = ConcreteFieldContainer(fields=OrderedDict())
         assert len(empty_container) == 0
 
     def test_get_size_total(self, container):
@@ -125,4 +150,46 @@ class TestFieldContainer:
         mock_fields["FIELD_2"].exists.side_effect = lambda container: container["FIELD_1"].get_value().encode() == 7
         container.decode_bin(buffer=11, expected_size=4)
         mock_fields["FIELD_2"].get_value().decode.assert_not_called()
+        
+    def test_str_representation(self, container):
+        s = str(container)
+        assert "{" in s
+        assert "FIELD_1" in s
+        assert "}" in s
+
+    def test_str_with_extra_content(self, mock_fields):
+        extra_container = ExtraFieldContainer(fields=mock_fields)
+        s = str(extra_container)
+        assert "\tEXTRA_INFO: 123" in s
+
+    def test_items_includes_extra_fields(self, mock_fields):
+        extra_container = ExtraFieldContainer(fields=mock_fields)
+        items = list(extra_container.items())
+        assert any(name == "EXTRA_FIELD" for name, _ in items)
+        assert len(items) == 4
+
+    def test_decode_bin_raises_overflow_error(self, container):
+        with pytest.raises(ContainerError, match="Buffer overflow"):
+            container.decode_bin(buffer=0, expected_size=2)
+
+    def test_decode_bin_calls_extra_decode(self, mock_fields):
+        extra_container = ExtraFieldContainer(fields=mock_fields)
+        extra_container.decode_bin(buffer=0b1110100101, expected_size=10)
+        assert extra_container.extra_decoded == (1, 2)
+
+    def test_hex_conversions(self, container):
+        hex_data = "A5"
+        container.decode_hex(hex_data)
+        assert container.encode_hex() == "A5"
+
+    def test_decode_hex_raises_alignment_error(self, container):
+        with pytest.raises(ContainerError, match="requires byte-aligned size"):
+            container.decode_hex("A")
+
+    def test_byte_array_conversions(self, container, mock_fields):
+        byte_data = b'\xA5'
+        container.decode_byte_array(byte_data)
+        mock_fields["FIELD_1"].get_value().decode.assert_called()
+        
+        assert container.encode_byte_array() == b'\xA5'
     

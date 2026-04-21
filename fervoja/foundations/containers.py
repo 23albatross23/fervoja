@@ -20,8 +20,10 @@ Created on Sun Apr 12 01:10:13 2026
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from abc import abstractmethod
 from collections import OrderedDict
 from collections.abc import Iterator
+import textwrap
 from .abstractions import AbstractFieldContainer
 from .fields import Field
 from .values import Endian
@@ -46,21 +48,44 @@ class FieldContainer(AbstractFieldContainer):
         raise ContainerError("Container fields cannot be deleted.")
     
     def __iter__(self) -> Iterator[str]:
-        for field_name, field_obj in self.__fields.items():
-            if field_obj.exists(container=self):
-                yield field_name
+        for name, _ in self.items():
+            yield name
     
     def __len__(self) -> int:
         return sum(1 for _ in self)
+    
+    @abstractmethod
+    def _extra__str__(self) -> str: pass
+
+    def __str__(self) -> str:
+        lines = ["{"]
+        for name, field in self.items():
+            lines.append(f"\t{name} : {field},")
+        
+        extra_content = self._extra__str__().strip()
+        if extra_content:
+            indented_extra = textwrap.indent(extra_content, "\t")
+            lines.append(indented_extra)
+        
+        lines.append("}")
+        return "\n".join(lines)
+    
+    @abstractmethod
+    def _extra_items(self) -> Iterator[tuple[str, Field]]: pass
     
     def items(self) -> Iterator[tuple[str, Field]]:
         for name, field in self.__fields.items():
             if field.exists(container=self):
                 yield name, field
+        
+        yield from self._extra_items()
     
     def get_size(self) -> int:
         '''Return the bit length.'''
         return sum(field.get_value().get_size() for _, field in self.items())
+    
+    @abstractmethod
+    def _extra_decode_bin(self, buffer : int, expected_size: int): pass
     
     def decode_bin(self, buffer : int, expected_size: int):
         current_pos = expected_size
@@ -68,10 +93,24 @@ class FieldContainer(AbstractFieldContainer):
             if field.exists(container=self):
                 field_val = field.get_value()
                 field_size = field_val.get_size()
+                if current_pos - field_size < 0:
+                    raise ContainerError(
+                        f"Buffer overflow decoding '{field_name}': "
+                        f"needs {field_size} bits but only {current_pos} remaining."
+                    )
                 current_pos -= field_size
                 mask = (1 << field_size) - 1
                 field_buffer = (buffer >> current_pos) & mask
                 field_val.decode(buffer=field_buffer)
+        
+        if current_pos > 0:
+            remaining_mask = (1 << current_pos) - 1
+            remaining_buffer = buffer & remaining_mask
+            
+            self._extra_decode_bin(
+                buffer=remaining_buffer, 
+                expected_size=current_pos
+            )
     
     def encode_bin(self) -> int:
         buffer = 0
