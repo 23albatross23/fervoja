@@ -61,6 +61,8 @@ testpaths = [
 ]
 
 [tool.coverage.run]
+concurrency = ["multiprocessing", "thread"]
+sigterm = true
 branch = true
 source = ["fervoja"]
 
