@@ -22,6 +22,7 @@ Created on Mon Apr 13 19:27:25 2026
 
 from fervoja.foundations.values import FieldConfig, Endian
 
+BIT_0  = FieldConfig(bit_size=0,  endian=Endian.BIG) #weird, for padding
 BIT_1  = FieldConfig(bit_size=1,  endian=Endian.BIG)
 BIT_2  = FieldConfig(bit_size=2,  endian=Endian.BIG)
 BIT_3  = FieldConfig(bit_size=3,  endian=Endian.BIG)
