@@ -34,8 +34,8 @@ class ConcreteFieldContainer(FieldContainer):
     def _extra_items(self):
         yield from ()
 
-    def _extra_decode_bin(self, buffer: int, expected_size: int):
-        pass
+    def _extra_decode_bin(self, buffer: int, expected_size: int) -> tuple[int, int]:
+        return 0, 0
     
 class ExtraFieldContainer(FieldContainer):
     def _extra__str__(self) -> str:
@@ -47,8 +47,9 @@ class ExtraFieldContainer(FieldContainer):
         f_extra.get_value().encode.return_value = 0xAA
         yield "EXTRA_FIELD", f_extra
 
-    def _extra_decode_bin(self, buffer: int, expected_size: int):
+    def _extra_decode_bin(self, buffer: int, expected_size: int) -> tuple[int, int]:
         self.extra_decoded = (buffer, expected_size)
+        return 0, 0
 
 class TestFieldContainer:
 
