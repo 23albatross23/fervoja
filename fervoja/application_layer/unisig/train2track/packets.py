@@ -96,7 +96,7 @@ class Factory:
     def __train_data(self) -> containers.UnisigPacket: pass
     def __external_data(self) -> containers.UnisigPacket: pass
     
-    def get(self, nid_packet: int):
+    def get(self, nid_packet: int) -> containers.UnisigPacket:
         if nid_packet not in KNOWN_IDENTIFIERS:
             raise ValueError(f"Unknown NID_PACKET = {nid_packet}")
             
