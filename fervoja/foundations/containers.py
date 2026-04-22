@@ -27,6 +27,7 @@ import textwrap
 from .abstractions import AbstractFieldContainer
 from .fields import Field
 from .values import Endian
+from .logger import Logger
 
 class ContainerError(Exception):
     pass
@@ -85,7 +86,9 @@ class FieldContainer(AbstractFieldContainer):
         return sum(field.get_value().get_size() for _, field in self.items())
     
     @abstractmethod
-    def _extra_decode_bin(self, buffer : int, expected_size: int): pass
+    def _extra_decode_bin(self, buffer : int, expected_size: int) -> tuple[int, int]: 
+        '''Returns a tuple indicating the remaining buffer and its size'''
+        pass
     
     def decode_bin(self, buffer : int, expected_size: int):
         current_pos = expected_size
@@ -107,10 +110,19 @@ class FieldContainer(AbstractFieldContainer):
             remaining_mask = (1 << current_pos) - 1
             remaining_buffer = buffer & remaining_mask
             
-            self._extra_decode_bin(
+            remaining_buffer, current_pos = self._extra_decode_bin(
                 buffer=remaining_buffer, 
                 expected_size=current_pos
             )
+        
+        if current_pos > 0:
+            logger = Logger()
+            log = f"""Buffer too long for message:
+            {self}
+            
+            Bits after position {current_pos} ignored.
+            """
+            logger.error(info=log)
     
     def encode_bin(self) -> int:
         buffer = 0

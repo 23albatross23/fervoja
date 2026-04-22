@@ -58,9 +58,9 @@ class UnisigPacket(UnisigContainer):
         '''Intentionally left blank'''
         pass
         
-    def _extra_decode_bin(self, buffer : int, expected_size: int): 
-        '''Intentionally left blank'''
-        pass
+    def _extra_decode_bin(self, buffer : int, expected_size: int) -> tuple[int, int]: 
+        '''Returns a tuple indicating the remaining buffer and its size'''
+        return (buffer, expected_size)
     
     def decode_hex(self, buffer : str):
         raise ContainerError(
@@ -165,7 +165,8 @@ class UnisigMessage(UnisigContainer):
         '''Returns a tuple indicating the remaining buffer and its size'''
         pass
         
-    def _extra_decode_bin(self, buffer : int, expected_size: int):
+    def _extra_decode_bin(self, buffer : int, expected_size: int) -> tuple[int, int]: 
+        '''Returns a tuple indicating the remaining buffer and its size'''
         remaining_buffer = buffer
         remaining_size = expected_size
         if expected_size >= 8:
@@ -179,9 +180,7 @@ class UnisigMessage(UnisigContainer):
             expected_size=remaining_size
         )
         
-        if remaining_size > 0:
-            #TODO: log
-            pass
+        return (remaining_buffer, remaining_size)
 
 class UnisigTelegram(UnisigMessage):
     '''Class to handle Eurobalise and Euroloop messages at subset026/8'''
