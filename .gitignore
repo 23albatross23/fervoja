@@ -9,3 +9,4 @@ fervoja_env/
 .spyproject/
 fervoja.egg-info/
 coverage_table.md
+logs/
