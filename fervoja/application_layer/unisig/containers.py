@@ -32,6 +32,7 @@ from .interfaces import UnisigInterfaces
 class UnisigContainer(FieldContainer):
     def __init__(self, fields: OrderedDict[str, fields.Field]):
         super().__init__(fields=fields)
+        self._update_length_field()
     
     @abstractmethod
     def _update_length_field(self): pass
