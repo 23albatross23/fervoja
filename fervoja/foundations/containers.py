@@ -20,6 +20,7 @@ Created on Sun Apr 12 01:10:13 2026
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from typing import Any
 from abc import abstractmethod
 from collections import OrderedDict
 from collections.abc import Iterator
@@ -36,12 +37,16 @@ class FieldContainer(AbstractFieldContainer):
     def __init__(self, fields : OrderedDict[str, Field]):
         self.__fields = fields
     
-    def __getitem__(self, key : str) -> Field:
-        return self.__fields[key]
+    def __getitem__(self, key : str) -> Any:
+        return self.__fields[key].get_value().get_value()
     
-    def __setitem__(self, key : str, value : Field):
+    def __setitem__(self, key : str, value : Any):
         if key in self.__fields:
-            self.__fields[key] = value
+            if self.__fields[key].exists(self):
+                self.__fields[key].get_value().set_value(value)
+            else:
+                raise ContainerError(
+                    "A value is being set to a field that don't exist at this moment.")
         else:
             raise ContainerError("New fields cannot be added to a container.")
     
@@ -86,7 +91,9 @@ class FieldContainer(AbstractFieldContainer):
         return sum(field.get_value().get_size() for _, field in self.items())
     
     @abstractmethod
-    def _extra_decode_bin(self, buffer : int, expected_size: int) -> tuple[int, int]: 
+    def _extra_decode_bin(self, 
+                          buffer: int, 
+                          expected_size: int) -> tuple[int, int]: 
         '''Returns a tuple indicating the remaining buffer and its size'''
         pass
     

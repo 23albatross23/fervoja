@@ -26,15 +26,9 @@ from fervoja.foundations.dependencies import Dependency
 
 class TestDependency:
     @pytest.fixture
-    def mock_field(self):
-        field = MagicMock()
-        field.get_value.return_value = 100
-        return field
-
-    @pytest.fixture
-    def mock_container(self, mock_field):
+    def mock_container(self):
         container = MagicMock()
-        container.__getitem__.return_value = mock_field
+        container.__getitem__.return_value = 100
         return container
 
     def test_fulfilled_no_condition(self, mock_container):
@@ -53,8 +47,8 @@ class TestDependency:
         
         assert dep.is_dependency_fulfilled(mock_container) is False
 
-    def test_interaction_flow(self, mock_container, mock_field):
+    def test_interaction_flow(self, mock_container):
         dep = Dependency(depends_on="TARGET", condition_function=lambda x: True)
         dep.is_dependency_fulfilled(mock_container)
+        
         mock_container.__getitem__.assert_called_once_with("TARGET")
-        mock_field.get_value.assert_called_once()

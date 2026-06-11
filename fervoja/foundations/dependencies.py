@@ -40,5 +40,5 @@ class Dependency(AbstractDependency):
     def is_dependency_fulfilled(self, container : AbstractFieldContainer) -> bool:
         result = True
         if self.__condition is not None:
-            result = self.__condition(container[self.__depends_on].get_value())
+            result = self.__condition(container[self.__depends_on])
         return result

@@ -43,8 +43,11 @@ class ExtraFieldContainer(FieldContainer):
 
     def _extra_items(self) -> Iterator[tuple[str, Field]]:
         f_extra = MagicMock()
-        f_extra.get_value().get_size.return_value = 8
-        f_extra.get_value().encode.return_value = 0xAA
+        v_extra = MagicMock()
+        v_extra.get_size.return_value = 8
+        v_extra.encode.return_value = 0xAA
+        f_extra.get_value.return_value = v_extra
+        f_extra.exists.return_value = True
         yield "EXTRA_FIELD", f_extra
 
     def _extra_decode_bin(self, buffer: int, expected_size: int) -> tuple[int, int]:
@@ -58,15 +61,28 @@ class TestFieldContainer:
         f1 = MagicMock()
         f2 = MagicMock()
         f3 = MagicMock()
+        
         f1.exists.return_value = True
         f2.exists.return_value = True
         f3.exists.return_value = True
-        f1.get_value().get_size.return_value = 3
-        f1.get_value().encode.return_value = 5
-        f2.get_value().get_size.return_value = 4
-        f2.get_value().encode.return_value = 2
-        f3.get_value().get_size.return_value = 1
-        f3.get_value().encode.return_value = 1
+        
+        v1 = MagicMock()
+        v1.get_value.return_value = 5
+        v1.get_size.return_value = 3
+        v1.encode.return_value = 5
+        f1.get_value.return_value = v1
+        
+        v2 = MagicMock()
+        v2.get_value.return_value = 2
+        v2.get_size.return_value = 4
+        v2.encode.return_value = 2
+        f2.get_value.return_value = v2
+        
+        v3 = MagicMock()
+        v3.get_value.return_value = 1
+        v3.get_size.return_value = 1
+        v3.encode.return_value = 1
+        f3.get_value.return_value = v3
         
         return OrderedDict([
             ("FIELD_1", f1),
@@ -78,18 +94,25 @@ class TestFieldContainer:
     def container(self, mock_fields):
         return ConcreteFieldContainer(fields=mock_fields)
 
-    def test_getitem_returns_field(self, container, mock_fields):
-        assert container["FIELD_1"] is mock_fields["FIELD_1"]
+    def test_getitem_returns_field(self, container):
+        assert container["FIELD_1"] == 5
 
-    def test_setitem_updates_existing_field(self, container):
-        new_field = MagicMock()
-        container["FIELD_1"] = new_field
-        assert container["FIELD_1"] is new_field
+    def test_setitem_updates_existing_field(self, container, mock_fields):
+        container["FIELD_1"] = 10
+        mock_fields["FIELD_1"].get_value().set_value.assert_called_once_with(10)
 
     def test_setitem_raises_error_on_new_field(self, container):
-        new_field = MagicMock()
         with pytest.raises(ContainerError, match="New fields cannot be added"):
-            container["NEW_FIELD"] = new_field
+            container["NEW_FIELD"] = 99
+            
+    def test_setitem_raises_error_if_field_does_not_exist_at_moment(
+            self, 
+            container, 
+            mock_fields):
+        mock_fields["FIELD_1"].exists.return_value = False
+        
+        with pytest.raises(ContainerError, match="A value is being set to a field that don't exist at this moment"):
+            container["FIELD_1"] = 42
 
     def test_delitem_raises_error(self, container):
         with pytest.raises(ContainerError, match="Container fields cannot be deleted"):
@@ -147,10 +170,31 @@ class TestFieldContainer:
         mock_fields["FIELD_3"].get_value().decode.assert_called_with(buffer=1)
 
     def test_decode_bin_with_dynamic_dependency(self, container, mock_fields):
-        mock_fields["FIELD_1"].get_value().decode.side_effect = lambda buffer: None
-        mock_fields["FIELD_2"].exists.side_effect = lambda container: container["FIELD_1"].get_value().encode() == 7
+        mock_fields["FIELD_2"].exists.side_effect =\
+            lambda container: container["FIELD_1"] == 7
         container.decode_bin(buffer=11, expected_size=4)
         mock_fields["FIELD_2"].get_value().decode.assert_not_called()
+        
+    def test_decode_bin_logs_error_when_buffer_too_long(
+            self, container, mock_fields):
+        from unittest.mock import patch, MagicMock
+        
+        # SCENARIO: We pass an expected_size of 12 bits, but our standard fields only take up 8.
+        # As ConcreteFieldContainer._extra_decode_bin returns (0, 0), current_pos will remain at 4 ( > 0 ).
+        
+        container._extra_decode_bin = MagicMock(return_value=(0, 4))
+        
+        with patch("fervoja.foundations.containers.Logger") as mock_logger_cls:
+            mock_logger_instance = mock_logger_cls.return_value
+            
+            container.decode_bin(buffer=0xFFF, expected_size=12)
+            
+            mock_logger_cls.assert_called_once()
+            mock_logger_instance.error.assert_called_once()
+            
+            kwargs = mock_logger_instance.error.call_args[1]
+            assert "Buffer too long for message" in kwargs["info"]
+            assert "Bits after position 4 ignored" in kwargs["info"]
         
     def test_str_representation(self, container):
         s = str(container)
@@ -193,4 +237,3 @@ class TestFieldContainer:
         mock_fields["FIELD_1"].get_value().decode.assert_called()
         
         assert container.encode_byte_array() == b'\xA5'
-    
