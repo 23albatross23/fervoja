@@ -52,11 +52,11 @@ class UnisigPacket(UnisigContainer):
         
     def _extra__str__(self) -> str:  
         '''Intentionally left blank'''
-        pass
+        return ""
     
     def _extra_items(self) -> Iterator[tuple[str,fields.Field]]: 
         '''Intentionally left blank'''
-        pass
+        yield from ()
         
     def _extra_decode_bin(self, buffer : int, expected_size: int) -> tuple[int, int]: 
         '''Returns a tuple indicating the remaining buffer and its size'''
@@ -64,22 +64,22 @@ class UnisigPacket(UnisigContainer):
     
     def decode_hex(self, buffer : str):
         raise ContainerError(
-            "UnisigPacket has not allways byte-aligned size (multiple of 8), use decode_bin() instead."
+            "UnisigPacket has not always byte-aligned size (multiple of 8), use decode_bin() instead."
         )
     
     def encode_hex(self) -> str:
         raise ContainerError(
-            "UnisigPacket has not allways byte-aligned size (multiple of 8), use encode_bin() instead."
+            "UnisigPacket has not always byte-aligned size (multiple of 8), use encode_bin() instead."
         )
     
     def decode_byte_array(self, buffer : bytes):
         raise ContainerError(
-            "UnisigPacket has not allways byte-aligned size (multiple of 8), use decode_bin() instead."
+            "UnisigPacket has not always byte-aligned size (multiple of 8), use decode_bin() instead."
         )
     
     def encode_byte_array(self) -> bytes:
         raise ContainerError(
-            "UnisigPacket has not allways byte-aligned size (multiple of 8), use encode_bin() instead."
+            "UnisigPacket has not always byte-aligned size (multiple of 8), use encode_bin() instead."
         )
         
 class UnisigMessage(UnisigContainer):
@@ -198,22 +198,22 @@ class UnisigTelegram(UnisigMessage):
     
     def decode_hex(self, buffer : str):
         raise ContainerError(
-            "UnisigTelegram has not allways byte-aligned size (multiple of 8), use decode_bin() instead."
+            "UnisigTelegram has not always byte-aligned size (multiple of 8), use decode_bin() instead."
         )
     
     def encode_hex(self) -> str:
         raise ContainerError(
-            "UnisigTelegram has not allways byte-aligned size (multiple of 8), use encode_bin() instead."
+            "UnisigTelegram has not always byte-aligned size (multiple of 8), use encode_bin() instead."
         )
     
     def decode_byte_array(self, buffer : bytes):
         raise ContainerError(
-            "UnisigTelegram has not allways byte-aligned size (multiple of 8), use decode_bin() instead."
+            "UnisigTelegram has not always byte-aligned size (multiple of 8), use decode_bin() instead."
         )
     
     def encode_byte_array(self) -> bytes:
         raise ContainerError(
-            "UnisigTelegram has not allways byte-aligned size (multiple of 8), use encode_bin() instead."
+            "UnisigTelegram has not always byte-aligned size (multiple of 8), use encode_bin() instead."
         )
     
     def _decode_padding(self, buffer : int, expected_size: int) -> tuple[int, int]: 
