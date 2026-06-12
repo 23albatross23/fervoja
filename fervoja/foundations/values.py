@@ -289,3 +289,95 @@ class HexadecimalValue(Value):
             result = int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
             
         return result
+    
+class StringValue(Value):
+    __slots__ = ()
+    __ENCODING = "iso-8859-1" # Standard encoding for text in SUBSET-026 and EULYNX
+
+    def __init__(
+            self, 
+            value: str, 
+            config: FieldConfig, 
+            is_valid_func=None, 
+            is_special_func=None):
+        if config.bit_size % 8 != 0:
+            raise ValError(
+                message="String bit size must be a multiple of 8",
+                error_code=ErrorCode.BIT_SIZE
+            )
+        super().__init__(
+            config=config, 
+            is_valid_func=is_valid_func, 
+            is_special_func=is_special_func
+        )
+        self.set_value(value)
+
+    def _unpack_from_int(self, buffer: int):
+        logical_value = buffer
+        if self._get_endian() == Endian.LITTLE:
+            byte_count = self.get_size() // 8
+            raw_bytes = buffer.to_bytes(
+                byte_count, 
+                byteorder=Endian.BIG.value
+            )
+            logical_value = int.from_bytes(
+                raw_bytes, 
+                byteorder=Endian.LITTLE.value
+            )
+        
+        self._set_value(logical_value)
+
+    def get_value(self) -> str:
+        logical_value = self._get_value()
+        byte_count = self.get_size() // 8
+        
+        raw_bytes = logical_value.to_bytes(
+            byte_count, 
+            byteorder=Endian.BIG.value
+        )
+        
+        # The strip(“\x00”) function removes leading null bytes when retrieving the string
+        return raw_bytes.decode(self.__ENCODING).strip('\x00')
+
+    def set_value(self, value: str):
+        if not isinstance(value, str):
+            raise ValError(
+                message="Value must be a string", 
+                error_code=ErrorCode.TYPE
+            )
+
+        byte_count = self.get_size() // 8
+
+        try:
+            raw_bytes = value.encode(self.__ENCODING)
+        except UnicodeEncodeError:
+            raise ValError(
+                message=f"String contains characters not supported by {self.__ENCODING}",
+                error_code=ErrorCode.TYPE
+            )
+
+        if len(raw_bytes) > byte_count:
+            raise ValError(
+                message=f"String length ({len(raw_bytes)} bytes) exceeds allocated size ({byte_count} bytes)",
+                error_code=ErrorCode.RANGE
+            )
+
+        # We pad with null bytes on the right if the string is shorter than the buffer
+        padded_bytes = raw_bytes.ljust(byte_count, b'\x00')
+        logical_value = int.from_bytes(
+            padded_bytes, 
+            byteorder=Endian.BIG.value
+        )
+        
+        self._set_value(logical_value)
+
+    def encode(self) -> int:
+        result = self._get_value()
+        if self._get_endian() == Endian.LITTLE:
+            byte_count = self.get_size() // 8
+            raw_bytes = result.to_bytes(byte_count, byteorder=Endian.BIG.value)
+            result = int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
+            
+        return result
+    
+    
