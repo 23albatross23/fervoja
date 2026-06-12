@@ -126,7 +126,14 @@ class Factory:
         pkt[names.N_ITER] = self.__create_field(names.N_ITER)
         for k in range(1,32):
             pkt[f"{names.M_VERSION}({k})"] = self.__create_field(
-                names.M_VERSION)
+                name=names.M_VERSION,
+                dependencies=(
+                    Dependency(
+                        depends_on=f"{names.N_ITER}", 
+                        condition_function=lambda x: x >= k
+                    ),
+                )
+            )
                 
         return containers.UnisigPacket(fields=pkt)
     
