@@ -117,7 +117,15 @@ class Factory(metaclass=singleton.SingletonMeta):
             IS_VALID: lambda x: (
                 not set(x).intersection("abcdeABCDE") and
                 "f" not in x.lstrip("Ff").lower()),
-            IS_SPECIAL: lambda x: x=="F"*16}
+            IS_SPECIAL: lambda x: x=="F"*16
+        }
+        
+        p_other_data_train2track = {
+            CLS: values.StringValue,
+            CONFIG: sizes.OTHER_DATA_TRAIN_TO_TRACK,
+            IS_VALID: lambda x: True,
+            IS_SPECIAL: lambda x: False
+        }
         
         #A
         for var in [names.A_NVMAXREDADH1, names.A_NVMAXREDADH2, names.A_NVMAXREDADH3]: #, 
@@ -282,6 +290,9 @@ class Factory(metaclass=singleton.SingletonMeta):
         self.__blueprints[names.V_RELEASEDP] = p_7_7
         self.__blueprints[names.V_RELEASEOL] = p_7_7
         self.__blueprints[names.X_TEXT] = p_8_2
+        
+        self.__blueprints[names.OTHER_DATA_TRAIN_TO_TRACK] =\
+            p_other_data_train2track
 
     def create(self, name: str, value: int = 0) -> values.Value:
         blueprint = self.__blueprints.get(name)

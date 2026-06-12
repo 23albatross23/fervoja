@@ -77,6 +77,7 @@ class Factory:
             )
         )        
         pkt[names.V_TRAIN] = self.__create_field(names.V_TRAIN)
+        pkt[names.Q_DIRTRAIN] = self.__create_field(names.Q_DIRTRAIN)
         pkt[names.M_MODE] = self.__create_field(names.M_MODE)
         pkt[names.M_LEVEL] = self.__create_field(names.M_LEVEL)
         pkt[names.NID_NTC] = self.__create_field(
@@ -88,13 +89,120 @@ class Factory:
         )
         return containers.UnisigPacket(fields=pkt)
 
-    def __position_report_two_bg(self) -> containers.UnisigPacket: pass
-    def __ob_system_version(self) -> containers.UnisigPacket: pass
-    def __error_reporting(self) -> containers.UnisigPacket: pass
-    def __train_running_number(self) -> containers.UnisigPacket: pass
-    def __transition_info(self) -> containers.UnisigPacket: pass
-    def __train_data(self) -> containers.UnisigPacket: pass
-    def __external_data(self) -> containers.UnisigPacket: pass
+    def __position_report_two_bg(self) -> containers.UnisigPacket:
+        pkt = self.__create_header(nid_packet=1)
+        pkt[names.Q_SCALE] = self.__create_field(names.Q_SCALE)
+        pkt[names.NID_LRBG] = self.__create_field(names.NID_LRBG)
+        pkt[names.NID_PRVLRBG] = self.__create_field(names.NID_PRVLRBG)
+        pkt[names.D_LRBG] = self.__create_field(names.D_LRBG)
+        pkt[names.Q_DIRLRBG] = self.__create_field(names.Q_DIRLRBG)
+        pkt[names.Q_DLRBG] = self.__create_field(names.Q_DLRBG)
+        pkt[names.L_DOUBTOVER] = self.__create_field(names.L_DOUBTOVER)
+        pkt[names.L_DOUBTUNDER] = self.__create_field(names.L_DOUBTUNDER)
+        pkt[names.Q_LENGTH] = self.__create_field(names.Q_LENGTH)
+        pkt[names.L_TRAININT] = self.__create_field(
+            name=names.L_TRAININT, 
+            dependencies=(Dependency(
+                depends_on=names.Q_LENGTH, 
+                condition_function=lambda x: 1 <= x <= 2),
+            )
+        )        
+        pkt[names.V_TRAIN] = self.__create_field(names.V_TRAIN)
+        pkt[names.Q_DIRTRAIN] = self.__create_field(names.Q_DIRTRAIN)
+        pkt[names.M_MODE] = self.__create_field(names.M_MODE)
+        pkt[names.M_LEVEL] = self.__create_field(names.M_LEVEL)
+        pkt[names.NID_NTC] = self.__create_field(
+            name=names.NID_NTC,
+            dependencies=(Dependency(
+                depends_on=names.M_LEVEL, 
+                condition_function=lambda x: x == 1),
+            )
+        )
+        return containers.UnisigPacket(fields=pkt)
+    
+    def __ob_system_version(self) -> containers.UnisigPacket:
+        pkt = self.__create_header(nid_packet=2)
+        pkt[names.M_VERSION] = self.__create_field(names.M_VERSION)
+        pkt[names.N_ITER] = self.__create_field(names.N_ITER)
+        for k in range(1,32):
+            pkt[f"{names.M_VERSION}({k})"] = self.__create_field(
+                names.M_VERSION)
+                
+        return containers.UnisigPacket(fields=pkt)
+    
+    def __error_reporting(self) -> containers.UnisigPacket:
+        pkt = self.__create_header(nid_packet=4)
+        pkt[names.M_ERROR] = self.__create_field(names.M_ERROR)
+        
+        return containers.UnisigPacket(fields=pkt)
+    
+    def __train_running_number(self) -> containers.UnisigPacket:
+        pkt = self.__create_header(nid_packet=5)
+        pkt[names.NID_OPERATIONAL] = self.__create_field(names.NID_OPERATIONAL)
+        
+        return containers.UnisigPacket(fields=pkt)
+    
+    def __transition_info(self) -> containers.UnisigPacket:
+        pkt = self.__create_header(nid_packet=9)
+        pkt[names.NID_LTRBG] = self.__create_field(names.NID_LTRBG)
+        
+        return containers.UnisigPacket(fields=pkt)
+    
+    def __train_data(self) -> containers.UnisigPacket:
+        pkt = self.__create_header(nid_packet=11)
+        pkt[names.NC_CDTRAIN] = self.__create_field(names.NC_CDTRAIN)
+        pkt[names.NC_TRAIN] = self.__create_field(names.NC_TRAIN)
+        pkt[names.L_TRAIN] = self.__create_field(names.L_TRAIN)
+        pkt[names.V_MAXTRAIN] = self.__create_field(names.V_MAXTRAIN)
+        pkt[names.M_LOADINGGAUGE] = self.__create_field(names.M_LOADINGGAUGE)
+        pkt[names.M_AXLELOADCAT] = self.__create_field(names.M_AXLELOADCAT)
+        pkt[names.M_AIRTIGHT] = self.__create_field(names.M_AIRTIGHT)
+        pkt[names.N_AXLE] = self.__create_field(names.N_AXLE)
+        pkt[names.N_ITER+"_VOLTAGE"] = self.__create_field(names.N_ITER)
+        for k in range(1,32):
+            pkt[f"{names.M_VOLTAGE}({k})"] = self.__create_field(
+                name=names.M_VOLTAGE,
+                dependencies=(
+                    Dependency(
+                        depends_on=f"{names.N_ITER}"+"_VOLTAGE", 
+                        condition_function=lambda x: x >= k
+                    ),
+                )
+            )
+            pkt[f"{names.NID_CTRACTION}({k})"] = self.__create_field(
+                name=names.NID_CTRACTION,
+                dependencies=(
+                    Dependency(
+                        depends_on=f"{names.N_ITER}"+"_VOLTAGE",
+                        condition_function=lambda x, current_k=k: x >= current_k
+                    ),
+                    Dependency(
+                        depends_on=f"{names.M_VOLTAGE}({k})",
+                        condition_function=lambda x: x != 0
+                    ),
+                )
+            )
+        
+        pkt[names.N_ITER+"_NTC"] = self.__create_field(names.N_ITER)
+        for k in range(1,32):
+            pkt[f"{names.NID_NTC}({k})"] = self.__create_field(
+                name=names.NID_NTC,
+                dependencies=(
+                    Dependency(
+                        depends_on=f"{names.N_ITER}"+"_NTC", 
+                        condition_function=lambda x, current_k=k: x >= current_k
+                    ),
+                )
+            )
+        
+        return containers.UnisigPacket(fields=pkt)
+    
+    def __external_data(self) -> containers.UnisigPacket:
+        pkt = self.__create_header(nid_packet=44)
+        pkt[names.NID_XUSER] = self.__create_field(names.NID_XUSER)
+        pkt[names.OTHER_DATA] = self.__create_field(names.OTHER_DATA)
+        
+        return containers.UnisigPacket(fields=pkt)
     
     def get(self, nid_packet: int) -> containers.UnisigPacket:
         if nid_packet not in KNOWN_IDENTIFIERS:

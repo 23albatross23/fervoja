@@ -42,3 +42,8 @@ BIT_23 = FieldConfig(bit_size=23, endian=Endian.BIG)
 BIT_24 = FieldConfig(bit_size=24, endian=Endian.BIG)
 BIT_32 = FieldConfig(bit_size=32, endian=Endian.BIG)
 BIT_64 = FieldConfig(bit_size=64, endian=Endian.BIG)
+
+OTHER_DATA_TRAIN_TO_TRACK = FieldConfig(
+    bit_size=8161, # MAX_L_PACKET - 30 = 8191 - 30
+    endian=Endian.BIG
+)
