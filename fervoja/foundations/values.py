@@ -380,4 +380,96 @@ class StringValue(Value):
             
         return result
     
+class DynamicBitStreamValue(Value):
+    """
+    Handles dynamically sized bit arrays for fields like OTHER_DATA in Packet 44.
+    The configured bit_size acts as a MAXIMUM limit, while the actual size
+    adapts to the assigned payload.
+    """
+    __slots__ = ('_bit_string',)
+    __ALLOWED = set("01")
+
+    def __init__(
+            self, 
+            config: FieldConfig, 
+            value: str = "", 
+            is_valid_func=None, 
+            is_special_func=None):
+        
+        self._bit_string = ""
+        super().__init__(
+            config=config, 
+            is_valid_func=is_valid_func, 
+            is_special_func=is_special_func
+        )
+        self.set_value(value)
+
+    def get_size(self) -> int:
+        """
+        Overrides the base method. 
+        Returns the ACTUAL size of the payload, not the max capacity.
+        """
+        return len(self._bit_string)
+
+    def get_value(self) -> str:
+        """Returns the exact binary string stored, preserving all leading/trailing zeros."""
+        return self._bit_string
+
+    def set_value(self, value: str):
+        if not isinstance(value, str) or not set(value).issubset(self.__ALLOWED):
+            raise ValError(
+                message="Value must be a binary string containing only '0' and '1'", 
+                error_code=ErrorCode.TYPE
+            )
+            
+        max_allowed_size = super().get_size()
+        
+        if len(value) > max_allowed_size:
+            raise ValError(
+                message=f"Bit stream length ({len(value)}) exceeds max allowed size ({max_allowed_size} bits)", 
+                error_code=ErrorCode.RANGE
+            )
+
+        self._bit_string = value
+        
+        # Sincronizamos el estado interno numérico de la clase raíz
+        logical_value = int(value, 2) if value else 0
+        self._set_value(logical_value)
+
+    def encode(self) -> int:
+        result = self._get_value()
+        
+        if self._get_endian() == Endian.LITTLE:
+            byte_count = self.get_size() // 8
+            
+            if byte_count > 0 and self.get_size() % 8 == 0:
+                raw_bytes = result.to_bytes(byte_count, byteorder=Endian.BIG.value)
+                result = int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
+            
+        return result
+
+    def _unpack_from_int(self, buffer: int):
+        """
+        Implements the abstract method for generic decoding.
+        
+        Warning: Unpacking an arbitrary integer back into a dynamic bit string
+        inherently loses leading zeros (e.g., int 5 is '101', but originally 
+        could have been '00101'). For OTHER_DATA, it is recommended to bypass 
+        decode() and use set_value() directly from the binary buffer extractor.
+        """
+        logical_value = buffer
+        
+        if self._get_endian() == Endian.LITTLE:
+            
+            byte_count = (buffer.bit_length() + 7) // 8
+            if byte_count > 0:
+                raw_bytes = buffer.to_bytes(byte_count, byteorder=Endian.BIG.value)
+                logical_value = int.from_bytes(raw_bytes, byteorder=Endian.LITTLE.value)
+        
+        
+        if logical_value == 0:
+            self.set_value("")
+        else:
+            self.set_value(bin(logical_value)[2:])
+    
     

@@ -44,6 +44,3 @@ class Field:
     
     def get_value(self) -> Value:
         return self.__value
-    
-    def get_iteration(self) -> int:
-        return self.__iteration
