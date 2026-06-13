@@ -130,7 +130,7 @@ class Factory:
                 dependencies=(
                     Dependency(
                         depends_on=f"{names.N_ITER}", 
-                        condition_function=lambda x: x >= k
+                        condition_function=lambda x, current_k=k: x >= current_k
                     ),
                 )
             )
@@ -145,7 +145,9 @@ class Factory:
     
     def __train_running_number(self) -> containers.UnisigPacket:
         pkt = self.__create_header(nid_packet=5)
-        pkt[names.NID_OPERATIONAL] = self.__create_field(names.NID_OPERATIONAL)
+        pkt[names.NID_OPERATIONAL] = self.__create_field(
+            name=names.NID_OPERATIONAL,
+            value="00000000")
         
         return containers.UnisigPacket(fields=pkt)
     
@@ -172,7 +174,7 @@ class Factory:
                 dependencies=(
                     Dependency(
                         depends_on=f"{names.N_ITER}"+"_VOLTAGE", 
-                        condition_function=lambda x: x >= k
+                        condition_function=lambda x, current_k=k: x >= current_k
                     ),
                 )
             )
@@ -207,7 +209,9 @@ class Factory:
     def __external_data(self) -> containers.UnisigPacket:
         pkt = self.__create_header(nid_packet=44)
         pkt[names.NID_XUSER] = self.__create_field(names.NID_XUSER)
-        pkt[names.OTHER_DATA] = self.__create_field(names.OTHER_DATA)
+        pkt[names.OTHER_DATA_TRAIN_TO_TRACK] = self.__create_field(
+            name=names.OTHER_DATA_TRAIN_TO_TRACK,
+            value="")
         
         return containers.UnisigPacket(fields=pkt)
     

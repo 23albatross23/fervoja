@@ -121,7 +121,7 @@ class Factory(metaclass=singleton.SingletonMeta):
         }
         
         p_other_data_train2track = {
-            CLS: values.StringValue,
+            CLS: values.DynamicBitStreamValue,
             CONFIG: sizes.OTHER_DATA_TRAIN_TO_TRACK,
             IS_VALID: lambda x: True,
             IS_SPECIAL: lambda x: False

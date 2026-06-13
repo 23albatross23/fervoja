@@ -365,128 +365,215 @@ class TestTrainToTrackPackets:
     # PACKET 4: Error Reporting
     # ---------------------------------------------------------
 
-    # def test_packet_4_error_reporting(self, factory: Factory):
-    #     packet = factory.get(4)
-    #     expected_sequence = [names.NID_PACKET, names.L_PACKET, names.M_ERROR]
-    #     expected_length = 8 + 13 + 8 # 29 bits
+    def test_packet_4_error_reporting(self, factory: Factory):
+        packet = factory.get(4)
+        expected_sequence = [names.NID_PACKET, names.L_PACKET, names.M_ERROR]
+        expected_length = 8 + 13 + 8 # 29 bits
         
-    #     self._assert_packet_structure(packet, 4, expected_sequence)
-    #     assert packet[names.L_PACKET] == expected_length
-
-    # # ---------------------------------------------------------
-    # # PACKET 5: Train running number
-    # # ---------------------------------------------------------
-
-    # def test_packet_5_train_running_number(self, factory: Factory):
-    #     packet = factory.get(5)
-    #     expected_sequence = [names.NID_PACKET, names.L_PACKET, names.NID_OPERATIONAL]
-    #     expected_length = 8 + 13 + 32 # 53 bits
+        self._assert_packet_structure(packet, 4, expected_sequence)
+        assert packet[names.L_PACKET] == expected_length
         
-    #     self._assert_packet_structure(packet, 5, expected_sequence)
-    #     assert packet[names.L_PACKET] == expected_length
-
-    # # ---------------------------------------------------------
-    # # PACKET 9: Level 2/3 transition information
-    # # ---------------------------------------------------------
-
-    # def test_packet_9_transition_info(self, factory: Factory):
-    #     packet = factory.get(9)
-    #     expected_sequence = [names.NID_PACKET, names.L_PACKET, names.NID_LTRBG]
-    #     expected_length = 8 + 13 + 24 # 45 bits
+    def test_packet_4_error_reporting_codecs_bin(self, factory: Factory):
+        packet_to_encode = factory.get(4)
+        packet_to_decode = factory.get(4)
         
-    #     self._assert_packet_structure(packet, 9, expected_sequence)
-    #     assert packet[names.L_PACKET] == expected_length
-
-    # # ---------------------------------------------------------
-    # # PACKET 11: Validated train data
-    # # ---------------------------------------------------------
-
-    # def test_packet_11_train_data_min(self, factory: Factory):
-    #     packet = factory.get(11)
-    #     expected_sequence = [
-    #         names.NID_PACKET, names.L_PACKET, names.NC_CDTRAIN, names.NC_TRAIN,
-    #         names.L_TRAIN, names.V_MAXTRAIN, names.M_LOADINGGAUGE, 
-    #         names.M_AXLELOADCAT, names.M_AIRTIGHT, names.N_AXLE,
-    #         names.N_ITER + "_VOLTAGE", names.N_ITER + "_NTC"
-    #     ]
-    #     # Base fields length
-    #     expected_length = 8 + 13 + 4 + 15 + 12 + 7 + 8 + 7 + 2 + 10 + 5 + 5 # 96 bits
+        packet_to_decode.decode_bin(
+            buffer=packet_to_encode.encode_bin(), 
+            expected_size=packet_to_encode.get_size())
         
-    #     self._assert_packet_structure(packet, 11, expected_sequence)
-    #     assert packet[names.L_PACKET] == expected_length
-
-    # def test_packet_11_train_data_voltage_and_ntc_iterations(self, factory: Factory):
-    #     packet = factory.get(11)
-        
-    #     # 1 Voltage iteration (No Traction NID), 2 NTC iterations
-    #     packet[names.N_ITER + "_VOLTAGE"] = 1
-    #     packet[f"{names.M_VOLTAGE}(1)"] = 0 # 0 means NID_CTRACTION doesn't follow
-    #     packet[names.N_ITER + "_NTC"] = 2
-        
-    #     expected_sequence = [
-    #         names.NID_PACKET, names.L_PACKET, names.NC_CDTRAIN, names.NC_TRAIN,
-    #         names.L_TRAIN, names.V_MAXTRAIN, names.M_LOADINGGAUGE, 
-    #         names.M_AXLELOADCAT, names.M_AIRTIGHT, names.N_AXLE,
-    #         names.N_ITER + "_VOLTAGE", 
-    #         f"{names.M_VOLTAGE}(1)", 
-    #         names.N_ITER + "_NTC",
-    #         f"{names.NID_NTC}(1)", f"{names.NID_NTC}(2)"
-    #     ]
-    #     expected_length = 96 + 4 + (8 * 2) # Base + 1 Voltage + 2 NTC
-        
-    #     self._assert_packet_structure(packet, 11, expected_sequence)
-    #     assert packet[names.L_PACKET] == expected_length
-
-    # def test_packet_11_train_data_voltage_with_traction(self, factory: Factory):
-    #     packet = factory.get(11)
-        
-    #     # 1 Voltage iteration WITH Traction NID
-    #     packet[names.N_ITER + "_VOLTAGE"] = 1
-    #     packet[f"{names.M_VOLTAGE}(1)"] = 1 # != 0 means NID_CTRACTION follows
-        
-    #     expected_sequence = [
-    #         names.NID_PACKET, names.L_PACKET, names.NC_CDTRAIN, names.NC_TRAIN,
-    #         names.L_TRAIN, names.V_MAXTRAIN, names.M_LOADINGGAUGE, 
-    #         names.M_AXLELOADCAT, names.M_AIRTIGHT, names.N_AXLE,
-    #         names.N_ITER + "_VOLTAGE", 
-    #         f"{names.M_VOLTAGE}(1)", f"{names.NID_CTRACTION}(1)",
-    #         names.N_ITER + "_NTC"
-    #     ]
-    #     expected_length = 96 + 4 + 10 # Base + 1 Voltage + 1 Traction
-        
-    #     self._assert_packet_structure(packet, 11, expected_sequence)
-    #     assert packet[names.L_PACKET] == expected_length
-
-    # def test_packet_11_codecs_bin(self, factory: Factory):
-    #     packet_to_encode = factory.get(11)
-    #     packet_to_decode = factory.get(11)
-        
-    #     # Setup complex state
-    #     packet_to_encode[names.N_ITER + "_VOLTAGE"] = 2
-    #     packet_to_encode[f"{names.M_VOLTAGE}(1)"] = 1 # Has traction
-    #     packet_to_encode[f"{names.NID_CTRACTION}(1)"] = 55
-    #     packet_to_encode[f"{names.M_VOLTAGE}(2)"] = 0 # No traction
-    #     packet_to_encode[names.N_ITER + "_NTC"] = 1
-    #     packet_to_encode[f"{names.NID_NTC}(1)"] = 22
-        
-    #     packet_to_decode.decode_bin(
-    #         buffer=packet_to_encode.encode_bin(), 
-    #         expected_size=packet_to_encode.get_size())
-        
-    #     for k in packet_to_encode.keys():
-    #         assert packet_to_encode[k] == packet_to_decode[k]
+        for k in packet_to_encode.keys():
+            assert packet_to_encode[k] == packet_to_decode[k]
             
-    #     assert packet_to_encode.encode_bin() == packet_to_decode.encode_bin()
+        assert packet_to_encode.encode_bin() == packet_to_decode.encode_bin()
 
-    # # ---------------------------------------------------------
-    # # PACKET 44: External Data
-    # # ---------------------------------------------------------
+    # ---------------------------------------------------------
+    # PACKET 5: Train running number
+    # ---------------------------------------------------------
 
-    # def test_packet_44_external_data(self, factory: Factory):
-    #     packet = factory.get(44)
-    #     expected_sequence = [
-    #         names.NID_PACKET, names.L_PACKET, names.NID_XUSER, names.OTHER_DATA
-    #     ]
+    def test_packet_5_train_running_number(self, factory: Factory):
+        packet = factory.get(5)
+        expected_sequence = [
+            names.NID_PACKET, names.L_PACKET, names.NID_OPERATIONAL
+        ]
+        expected_length = 8 + 13 + 32 # 53 bits
         
-    #     # OTHER_DATA length is dynamic, so we only verify the sequence
-    #     self._assert_packet_structure(packet, 44, expected_sequence)
+        self._assert_packet_structure(packet, 5, expected_sequence)
+        assert packet[names.L_PACKET] == expected_length
+        
+    def test_packet_5_train_running_number_codecs_bin(self, factory: Factory):
+        packet_to_encode = factory.get(5)
+        packet_to_decode = factory.get(5)
+        
+        packet_to_decode.decode_bin(
+            buffer=packet_to_encode.encode_bin(), 
+            expected_size=packet_to_encode.get_size())
+        
+        for k in packet_to_encode.keys():
+            assert packet_to_encode[k] == packet_to_decode[k]
+            
+        assert packet_to_encode.encode_bin() == packet_to_decode.encode_bin()
+
+    # ---------------------------------------------------------
+    # PACKET 9: Level 2/3 transition information
+    # ---------------------------------------------------------
+
+    def test_packet_9_transition_info(self, factory: Factory):
+        packet = factory.get(9)
+        expected_sequence = [names.NID_PACKET, names.L_PACKET, names.NID_LTRBG]
+        expected_length = 8 + 13 + 24 # 45 bits
+        
+        self._assert_packet_structure(packet, 9, expected_sequence)
+        assert packet[names.L_PACKET] == expected_length
+        
+    def test_packet_9_transition_info_codecs_bin(self, factory: Factory):
+        packet_to_encode = factory.get(9)
+        packet_to_decode = factory.get(9)
+        
+        packet_to_decode.decode_bin(
+            buffer=packet_to_encode.encode_bin(), 
+            expected_size=packet_to_encode.get_size())
+        
+        for k in packet_to_encode.keys():
+            assert packet_to_encode[k] == packet_to_decode[k]
+            
+        assert packet_to_encode.encode_bin() == packet_to_decode.encode_bin()
+
+    # ---------------------------------------------------------
+    # PACKET 11: Validated train data
+    # ---------------------------------------------------------
+
+    def test_packet_11_train_data_min(self, factory: Factory):
+        packet = factory.get(11)
+        expected_sequence = [
+            names.NID_PACKET, names.L_PACKET, names.NC_CDTRAIN, names.NC_TRAIN,
+            names.L_TRAIN, names.V_MAXTRAIN, names.M_LOADINGGAUGE, 
+            names.M_AXLELOADCAT, names.M_AIRTIGHT, names.N_AXLE,
+            names.N_ITER + "_VOLTAGE", names.N_ITER + "_NTC"
+        ]
+        # Base fields length
+        expected_length = 8 + 13 + 4 + 15 + 12 + 7 + 8 + 7 + 2 + 10 + 5 + 5 # 96 bits
+        
+        self._assert_packet_structure(packet, 11, expected_sequence)
+        assert packet[names.L_PACKET] == expected_length
+
+    def test_packet_11_train_data_max(
+            self, 
+            factory: Factory):
+        packet = factory.get(11)
+        
+        # 1 Voltage iteration (No Traction NID), 2 NTC iterations
+        packet[names.N_ITER + "_VOLTAGE"] = 31
+        packet[names.N_ITER + "_NTC"] = 31
+        
+        expected_sequence = [
+            names.NID_PACKET, names.L_PACKET, names.NC_CDTRAIN, names.NC_TRAIN,
+            names.L_TRAIN, names.V_MAXTRAIN, names.M_LOADINGGAUGE, 
+            names.M_AXLELOADCAT, names.M_AIRTIGHT, names.N_AXLE,
+            names.N_ITER + "_VOLTAGE"
+        ]
+        
+        for k in range(1, 32):
+            name = names.M_VOLTAGE + f"({k})"
+            packet[name] = 1
+            expected_sequence.append(name)
+            expected_sequence.append(names.NID_CTRACTION + f"({k})")
+            
+        expected_sequence.append(names.N_ITER + "_NTC")
+        
+        for k in range(1, 32):
+            expected_sequence.append(names.NID_NTC + f"({k})")
+        
+        expected_length = 96 + ((4 + 10) * 31) + (8 * 31) # Base + 31 Voltage + 31 NTC
+        
+        self._assert_packet_structure(packet, 11, expected_sequence)
+        assert packet[names.L_PACKET] == expected_length
+
+    def test_packet_11_train_data_voltage_with_traction(
+            self, 
+            factory: Factory):
+        packet = factory.get(11)
+        
+        # 1 Voltage iteration WITH Traction NID
+        packet[names.N_ITER + "_VOLTAGE"] = 1
+        packet[f"{names.M_VOLTAGE}(1)"] = 1 # != 0 means NID_CTRACTION follows
+        
+        expected_sequence = [
+            names.NID_PACKET, names.L_PACKET, names.NC_CDTRAIN, names.NC_TRAIN,
+            names.L_TRAIN, names.V_MAXTRAIN, names.M_LOADINGGAUGE, 
+            names.M_AXLELOADCAT, names.M_AIRTIGHT, names.N_AXLE,
+            names.N_ITER + "_VOLTAGE", 
+            f"{names.M_VOLTAGE}(1)", f"{names.NID_CTRACTION}(1)",
+            names.N_ITER + "_NTC"
+        ]
+        expected_length = 96 + 4 + 10 # Base + 1 Voltage + 1 Traction
+        
+        for m_voltage in range(1, 16):
+            packet[f"{names.M_VOLTAGE}(1)"] = m_voltage
+            self._assert_packet_structure(packet, 11, expected_sequence)
+            assert packet[names.L_PACKET] == expected_length
+
+    def test_packet_11_codecs_bin(self, factory: Factory):
+        packet_to_encode = factory.get(11)
+        packet_to_decode = factory.get(11)
+        
+        # Setup complex state
+        packet_to_encode[names.N_ITER + "_VOLTAGE"] = 2
+        packet_to_encode[f"{names.M_VOLTAGE}(1)"] = 1 # Has traction
+        packet_to_encode[f"{names.NID_CTRACTION}(1)"] = 55
+        packet_to_encode[f"{names.M_VOLTAGE}(2)"] = 0 # No traction
+        packet_to_encode[names.N_ITER + "_NTC"] = 1
+        packet_to_encode[f"{names.NID_NTC}(1)"] = 22
+        
+        packet_to_decode.decode_bin(
+            buffer=packet_to_encode.encode_bin(), 
+            expected_size=packet_to_encode.get_size())
+        
+        for k in packet_to_encode.keys():
+            assert packet_to_encode[k] == packet_to_decode[k]
+            
+        assert packet_to_encode.encode_bin() == packet_to_decode.encode_bin()
+
+    # ---------------------------------------------------------
+    # PACKET 44: External Data
+    # ---------------------------------------------------------
+
+    def test_packet_44_external_data_no_data(self, factory: Factory):
+        packet = factory.get(44)
+        expected_sequence = [
+            names.NID_PACKET, names.L_PACKET, names.NID_XUSER, 
+            names.OTHER_DATA_TRAIN_TO_TRACK
+        ]
+        
+        # OTHER_DATA length is dynamic, so we only verify the sequence
+        self._assert_packet_structure(packet, 44, expected_sequence)
+        
+    def test_packet_44_external_data_with_data(self, factory: Factory):
+        packet = factory.get(44)
+        expected_sequence = [
+            names.NID_PACKET, names.L_PACKET, names.NID_XUSER, 
+            names.OTHER_DATA_TRAIN_TO_TRACK
+        ]
+        
+        other_data = "010010000110010101101100011011000110111100100000011101110110111101110010011011000110010000100001"
+        expected_length = 30 + len(other_data)
+        
+        packet[names.OTHER_DATA_TRAIN_TO_TRACK] = other_data
+        
+        self._assert_packet_structure(packet, 44, expected_sequence)
+        assert packet[names.L_PACKET] == expected_length
+    
+    # ---------------------------------------------------------
+    # UNKNOWN PACKET
+    # ---------------------------------------------------------
+    
+    def test_unknown_packet(self, factory: Factory):
+        valid_identifier = (0, 1, 2, 4, 5, 9, 11, 44,)
+        
+        for identifier in range(0, 256):
+            if identifier not in valid_identifier:
+                with pytest.raises(
+                    ValueError, 
+                    match=f"Unknown NID_PACKET = {identifier}"):
+                    
+                    packet = factory.get(identifier)
+    
