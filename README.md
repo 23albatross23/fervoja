@@ -52,11 +52,11 @@ pip install -e .[test]
 | fervoja/foundations/abstractions.py                      |        3 |        0 |        0 |        0 |    100% |
 | fervoja/foundations/containers.py                        |       89 |        0 |       28 |        0 |    100% |
 | fervoja/foundations/dependencies.py                      |       11 |        0 |        2 |        0 |    100% |
-| fervoja/foundations/fields.py                            |       16 |        1 |        0 |        0 |     94% |
+| fervoja/foundations/fields.py                            |       14 |        0 |        0 |        0 |    100% |
 | fervoja/foundations/logger.py                            |       40 |        3 |        8 |        1 |     92% |
 | fervoja/foundations/singleton.py                         |       10 |        0 |        2 |        0 |    100% |
-| fervoja/foundations/values.py                            |      189 |        0 |       44 |        0 |    100% |
-| **TOTAL**                                                |  **967** |  **186** |  **142** |    **1** | **81%** |
+| fervoja/foundations/values.py                            |      227 |        0 |       58 |        0 |    100% |
+| **TOTAL**                                                | **1003** |  **185** |  **156** |    **1** | **82%** |
 
 10 empty files skipped.
 
