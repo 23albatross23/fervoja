@@ -432,7 +432,6 @@ class DynamicBitStreamValue(Value):
 
         self._bit_string = value
         
-        # Sincronizamos el estado interno numérico de la clase raíz
         logical_value = int(value, 2) if value else 0
         self._set_value(logical_value)
 

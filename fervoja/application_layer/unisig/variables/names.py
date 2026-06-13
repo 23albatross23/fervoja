@@ -257,3 +257,6 @@ V_TRAIN = "V_TRAIN" # 7.5.1.172 [cite: 538]
 V_TSR = "V_TSR" # 7.5.1.173 [cite: 538]
 
 X_TEXT = "X_TEXT" # 7.5.1.174 [cite: 538]
+
+#Weird UNISIG stuff such unnamed Other data in subset026/7-7.4.3.6
+OTHER_DATA_TRAIN_TO_TRACK = "OTHER_DATA_TRAIN_TO_TRACK"
