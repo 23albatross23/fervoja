@@ -186,8 +186,13 @@ class UnisigMessage(UnisigContainer):
 class UnisigTelegram(UnisigMessage):
     '''Class to handle Eurobalise and Euroloop messages at subset026/8'''
     def __init__(self, fields: OrderedDict[str, fields.Field],
-                 allowed_packets: tuple[int]):
-        super().__init__(fields=fields, allowed_packets=allowed_packets)
+                 allowed_packets: tuple[int], 
+                 packets_interface: UnisigInterfaces):
+        super().__init__(
+            fields=fields, 
+            allowed_packets=allowed_packets, 
+            packets_interface=packets_interface
+        )
     
     def _padding__str__(self) -> str: 
         '''Intentionally left blank'''
@@ -235,8 +240,13 @@ class UnisigRadioMessage(UnisigMessage):
         7 : sizes.BIT_7
     }
     def __init__(self, fields: OrderedDict[str, fields.Field],
-                 allowed_packets: tuple[int]):
-        super().__init__(fields=fields, allowed_packets=allowed_packets)
+                 allowed_packets: tuple[int], 
+                 packets_interface: UnisigInterfaces):
+        super().__init__(
+            fields=fields, 
+            allowed_packets=allowed_packets, 
+            packets_interface=packets_interface
+        )
         self.__padding: fields.Field = fields.Field(
             value=values.NaturalValue(
                     value=0,
