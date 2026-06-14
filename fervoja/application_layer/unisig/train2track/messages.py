@@ -89,7 +89,6 @@ class Factory:
 
     def __request_for_shunting(self) -> containers.UnisigRadioMessage:
         msg = self.__create_header(nid_message=130)
-        msg[names.Q_MARQSTREASON] = self.__create_field(names.Q_MARQSTREASON)
         return containers.UnisigRadioMessage(
             fields=msg, 
             allowed_packets=(0, 1),

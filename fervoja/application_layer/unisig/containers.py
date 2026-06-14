@@ -24,13 +24,14 @@ from abc import abstractmethod
 from collections import OrderedDict
 from collections.abc import Iterator
 from fervoja.foundations.containers import FieldContainer, ContainerError
-from fervoja.foundations import fields, values
+from fervoja.foundations.fields import Field
+from fervoja.foundations import values
 from .variables.names import L_PACKET, L_MESSAGE, NID_PACKET
 from .variables import sizes
 from .interfaces import UnisigInterfaces
 
 class UnisigContainer(FieldContainer):
-    def __init__(self, fields: OrderedDict[str, fields.Field]):
+    def __init__(self, fields: OrderedDict[str, Field]):
         super().__init__(fields=fields)
         self._update_length_field()
     
@@ -39,14 +40,14 @@ class UnisigContainer(FieldContainer):
 
 class UnisigPacket(UnisigContainer):
     '''Class to handle packets at subset026/7'''
-    def __init__(self, fields: OrderedDict[str, fields.Field]):
+    def __init__(self, fields: OrderedDict[str, Field]):
         super().__init__(fields=fields)
         
     def _update_length_field(self):
         l_packet = self.get_size()
         self[L_PACKET] = l_packet
         
-    def __setitem__(self, key : str, value : fields.Field):
+    def __setitem__(self, key : str, value : Field):
         super().__setitem__(key, value)
         if key != L_PACKET:
             self._update_length_field()
@@ -55,13 +56,16 @@ class UnisigPacket(UnisigContainer):
         '''Intentionally left blank'''
         return ""
     
-    def _extra_items(self) -> Iterator[tuple[str,fields.Field]]: 
+    def _extra_items(self) -> Iterator[tuple[str,Field]]: 
         '''Intentionally left blank'''
         yield from ()
         
     def _extra_decode_bin(self, buffer : int, expected_size: int) -> tuple[int, int]: 
-        '''Returns a tuple indicating the remaining buffer and its size'''
-        return (buffer, expected_size)
+        '''
+        We return (0, 0) so that FieldContainer does not generate warning logs. 
+        The actual remaining buffer is being managed by the UnisigMessage loop.
+        '''
+        return (0, 0)
     
     def decode_hex(self, buffer : str):
         raise ContainerError(
@@ -84,26 +88,24 @@ class UnisigPacket(UnisigContainer):
         )
         
 class UnisigMessage(UnisigContainer):
-    def __init__(self, fields: OrderedDict[str, fields.Field],
+    def __init__(self, fields: OrderedDict[str, Field],
                  allowed_packets: tuple[int], 
                  packets_interface: UnisigInterfaces):
         if any(p > 255 for p in allowed_packets):
             raise ContainerError("All packet identifiers must be in the range 0-255.")
-        super().__init__(fields=fields)
+            
         self._allowed_packets = allowed_packets
-        self.__packets: list[UnisigPacket] = []
-        self.__packets_interface = packets_interface
+        self._packets: list[UnisigPacket] = []
+        self._packets_interface = packets_interface
+        super().__init__(fields=fields)
         
     @abstractmethod
     def _padding__str__(self) -> str: pass
         
     def _extra__str__(self) -> str:
-        lines = ["{"] if len(self.__packets) != 0 else []
-        for pkt in self.__packets:
-            lines.append(f"\t{pkt},")
-        
-        if len(self.__packets) != 0:
-            lines.append("}")
+        lines = []
+        for pkt in self._packets:
+            lines.append(f"{pkt},")
         
         padding = self._padding__str__()
         if padding != "":
@@ -112,26 +114,26 @@ class UnisigMessage(UnisigContainer):
         return "\n".join(lines)
     
     @abstractmethod
-    def _padding_item(self) -> Iterator[tuple[str,fields.Field]]: pass
+    def _padding_item(self) -> Iterator[tuple[str,Field]]: pass
     
-    def _extra_items(self) -> Iterator[tuple[str,fields.Field]]: 
-        for pkt in self.__packets:
+    def _extra_items(self) -> Iterator[tuple[str,Field]]: 
+        for pkt in self._packets:
             for name, value in pkt.items():
                 yield name, value
         
         yield from self._padding_item()
     
     def add_packet(self, packet: UnisigPacket):
-        self.__packets.append(packet)
+        self._packets.append(packet)
         self._update_length_field()
     
     def get_packets(self) -> list[UnisigPacket]:
-        return self.__packets
+        return self._packets
     
     def __decode_packets(self, buffer : int, expected_size: int) -> tuple[int, int]:
         '''Returns a tuple indicating the remaining buffer and its size'''
         from .variables.variables import Factory as VariableFactory
-        if self.__packets_interface == UnisigInterfaces.TRAIN_TO_TRACK:
+        if self._packets_interface == UnisigInterfaces.TRAIN_TO_TRACK:
             from .train2track.packets import Factory
         else: 
             from .track2train.packets import Factory
@@ -141,21 +143,24 @@ class UnisigMessage(UnisigContainer):
         nid_packet = var_factory.create(name=NID_PACKET)
         current_pos = expected_size
         while current_pos >= 8:
-            nid_packet_val = nid_packet.get_value()
-            nid_packet_size = nid_packet_val.get_size()
+            nid_packet_size = nid_packet.get_size()
             if current_pos - nid_packet_size < 0:
                 raise ContainerError(
                     f"Buffer overflow decoding '{NID_PACKET}': "
                     f"needs {nid_packet_size} bits but only {current_pos} remaining."
                 )
+            peek_pos = current_pos - nid_packet_size
             mask = (1 << nid_packet_size) - 1
-            field_buffer = (buffer >> current_pos) & mask
-            nid_packet_val.decode(buffer=field_buffer)
-            pkt = pkt_factory.get(nid_packet=nid_packet_val.get_value())
+            field_buffer = (buffer >> peek_pos) & mask
+            nid_packet.decode(buffer=field_buffer)
+            nid_packet_val = nid_packet.get_value()
+            pkt = pkt_factory.get(nid_packet=nid_packet_val)
             remaining_mask = (1 << current_pos) - 1
             remaining_buffer = buffer & remaining_mask
             pkt.decode_bin(buffer=remaining_buffer, expected_size=current_pos)
-            current_pos -= pkt.get_size()            
+            actual_size = pkt.get_size()
+            self.add_packet(pkt)
+            current_pos -= actual_size
         
         remaining_mask = (1 << current_pos) - 1
         remaining_buffer = buffer & remaining_mask
@@ -185,7 +190,7 @@ class UnisigMessage(UnisigContainer):
 
 class UnisigTelegram(UnisigMessage):
     '''Class to handle Eurobalise and Euroloop messages at subset026/8'''
-    def __init__(self, fields: OrderedDict[str, fields.Field],
+    def __init__(self, fields: OrderedDict[str, Field],
                  allowed_packets: tuple[int], 
                  packets_interface: UnisigInterfaces):
         super().__init__(
@@ -196,9 +201,9 @@ class UnisigTelegram(UnisigMessage):
     
     def _padding__str__(self) -> str: 
         '''Intentionally left blank'''
-        pass
+        return ""
     
-    def _padding_item(self) -> Iterator[tuple[str,fields.Field]]: 
+    def _padding_item(self) -> Iterator[tuple[str,Field]]: 
         '''Intentionally left blank'''
         yield from ()
     
@@ -224,7 +229,7 @@ class UnisigTelegram(UnisigMessage):
     
     def _decode_padding(self, buffer : int, expected_size: int) -> tuple[int, int]: 
         '''Returns a tuple indicating the remaining buffer and its size'''
-        return (buffer, expected_size)
+        return (0, 0)
         
 class UnisigRadioMessage(UnisigMessage):
     '''Class to handle Euroradio messages at subset026/8 and subset039'''
@@ -239,43 +244,53 @@ class UnisigRadioMessage(UnisigMessage):
         6 : sizes.BIT_6,
         7 : sizes.BIT_7
     }
-    def __init__(self, fields: OrderedDict[str, fields.Field],
+    def __init__(self, fields: OrderedDict[str, Field],
                  allowed_packets: tuple[int], 
                  packets_interface: UnisigInterfaces):
+        self.__padding: Field = Field(
+            value=values.NaturalValue(
+                value=0,
+                config=sizes.BIT_0, 
+                is_valid_func=lambda x: x < 8, 
+                is_special_func=lambda x: False
+            )
+        )
         super().__init__(
             fields=fields, 
             allowed_packets=allowed_packets, 
             packets_interface=packets_interface
         )
-        self.__padding: fields.Field = fields.Field(
-            value=values.NaturalValue(
-                    value=0,
-                    config=sizes.BIT_0, 
-                    is_valid_func=lambda x: x < 8, 
-                    is_special_func=lambda x: False
-                )
-            )
+        
+    def __get_size_without_padding(self) -> int:
+        """Calculate the total size in bits, excluding the current padding field."""
+        total = 0
+        for field_name, field_obj in self.items():
+            if field_name != 'PADDING':
+                total += field_obj.get_value().get_size()
+            
+        return total
         
     def __update_padding(self):
-        padding_value = self.get_size() % 8
-        if padding_value != 0:
-            self.__padding = fields.Field(
-                value=values.NaturalValue(
-                    value=padding_value,
-                    config=UnisigRadioMessage.__padding_configs[padding_value], 
-                    is_valid_func=lambda x: x < 8, 
-                    is_special_func=lambda x: False
-                )
+        size_without_padding = self.__get_size_without_padding()
+        padding_value = (8 - (size_without_padding % 8)) % 8
+        self.__padding = Field(
+            value=values.NaturalValue(
+                value=0,
+                config=UnisigRadioMessage.__padding_configs[padding_value], 
+                is_valid_func=lambda x: x < 8, 
+                is_special_func=lambda x: False
             )
+        )
     
-    def _padding_item(self) -> Iterator[tuple[str,fields.Field]]:
+    def _padding_item(self) -> Iterator[tuple[str,Field]]:
         yield "PADDING", self.__padding
         
     def _update_length_field(self):
+        self.__update_padding()
         l_message = self.get_size() // 8
         self[L_MESSAGE] = l_message
         
-    def __setitem__(self, key : str, value : fields.Field):
+    def __setitem__(self, key : str, value : Field):
         super().__setitem__(key, value)
         self.__update_padding()
         if key != L_MESSAGE:
@@ -288,12 +303,30 @@ class UnisigRadioMessage(UnisigMessage):
         return f"PADDING : {bits}"
     
     def _decode_padding(self, buffer : int, expected_size: int) -> tuple[int, int]:
-        self.__padding = fields.Field(
-            value=values.NaturalValue(
-                value=buffer,
-                config=UnisigRadioMessage.__padding_configs[expected_size], 
-                is_valid_func=lambda x: x < 8, 
-                is_special_func=lambda x: False
+        remaining_buffer = 0
+        remaining_size = 0
+        if 0 <= expected_size <= 7 and buffer <= 255:
+            self.__padding = Field(
+                value=values.NaturalValue(
+                    value=buffer,
+                    config=UnisigRadioMessage.__padding_configs[expected_size], 
+                    is_valid_func=lambda x: x < 8, 
+                    is_special_func=lambda x: False
+                )
             )
-        )
+        else: #remaining info, buffer is incorrect, min padding
+            self.__padding = Field(
+                value=values.NaturalValue(
+                    value=0,
+                    config=UnisigRadioMessage.__padding_configs[0], 
+                    is_valid_func=lambda x: x < 8, 
+                    is_special_func=lambda x: False
+                )
+            )
+            remaining_buffer = buffer
+            remaining_size = expected_size
+            
+        
+        return (remaining_buffer, remaining_size)
+        
       

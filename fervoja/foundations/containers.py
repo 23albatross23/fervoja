@@ -65,8 +65,9 @@ class FieldContainer(AbstractFieldContainer):
 
     def __str__(self) -> str:
         lines = ["{"]
-        for name, field in self.items():
-            lines.append(f"\t{name} : {field},")
+        for name, field in self.__fields.items():
+            if field.exists(container=self):
+                lines.append(f"\t{name} : {self[name]},")
         
         extra_content = self._extra__str__().strip()
         if extra_content:
