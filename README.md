@@ -41,22 +41,23 @@ pip install -e .[test]
 
 ## 📊 Code coverage
 <!-- coverage-start -->
-| Name                                                     |    Stmts |     Miss |   Branch |   BrPart |   Cover |
-|--------------------------------------------------------- | -------: | -------: | -------: | -------: | ------: |
-| fervoja/application\_layer/unisig/containers.py          |      137 |       82 |       26 |        0 |     35% |
-| fervoja/application\_layer/unisig/interfaces.py          |        7 |        0 |        0 |        0 |    100% |
-| fervoja/application\_layer/unisig/train2track/packets.py |       99 |        0 |        8 |        0 |    100% |
-| fervoja/application\_layer/unisig/variables/names.py     |      227 |        0 |        0 |        0 |    100% |
-| fervoja/application\_layer/unisig/variables/sizes.py     |       22 |        0 |        0 |        0 |    100% |
-| fervoja/application\_layer/unisig/variables/variables.py |      182 |        0 |       30 |        0 |    100% |
-| fervoja/foundations/abstractions.py                      |        3 |        0 |        0 |        0 |    100% |
-| fervoja/foundations/containers.py                        |       89 |        0 |       28 |        0 |    100% |
-| fervoja/foundations/dependencies.py                      |       11 |        0 |        2 |        0 |    100% |
-| fervoja/foundations/fields.py                            |       14 |        0 |        0 |        0 |    100% |
-| fervoja/foundations/logger.py                            |       40 |        3 |        8 |        1 |     92% |
-| fervoja/foundations/singleton.py                         |       10 |        0 |        2 |        0 |    100% |
-| fervoja/foundations/values.py                            |      227 |        0 |       58 |        0 |    100% |
-| **TOTAL**                                                | **1068** |   **85** |  **162** |    **1** | **91%** |
+| Name                                                      |    Stmts |     Miss |   Branch |   BrPart |   Cover |
+|---------------------------------------------------------- | -------: | -------: | -------: | -------: | ------: |
+| fervoja/application\_layer/unisig/containers.py           |      154 |       16 |       28 |        5 |     88% |
+| fervoja/application\_layer/unisig/interfaces.py           |        7 |        0 |        0 |        0 |    100% |
+| fervoja/application\_layer/unisig/train2track/messages.py |       86 |        0 |        2 |        0 |    100% |
+| fervoja/application\_layer/unisig/train2track/packets.py  |       99 |        0 |        8 |        0 |    100% |
+| fervoja/application\_layer/unisig/variables/names.py      |      227 |        0 |        0 |        0 |    100% |
+| fervoja/application\_layer/unisig/variables/sizes.py      |       22 |        0 |        0 |        0 |    100% |
+| fervoja/application\_layer/unisig/variables/variables.py  |      182 |        0 |       30 |        0 |    100% |
+| fervoja/foundations/abstractions.py                       |        3 |        0 |        0 |        0 |    100% |
+| fervoja/foundations/containers.py                         |       90 |        0 |       30 |        0 |    100% |
+| fervoja/foundations/dependencies.py                       |       11 |        0 |        2 |        0 |    100% |
+| fervoja/foundations/fields.py                             |       14 |        0 |        0 |        0 |    100% |
+| fervoja/foundations/logger.py                             |       40 |        3 |        8 |        1 |     92% |
+| fervoja/foundations/singleton.py                          |       10 |        0 |        2 |        0 |    100% |
+| fervoja/foundations/values.py                             |      227 |        0 |       58 |        0 |    100% |
+| **TOTAL**                                                 | **1172** |   **19** |  **168** |    **6** | **98%** |
 
 10 empty files skipped.
 
