@@ -12,11 +12,11 @@ The main goal is to provide a unified and lightweight interface to work with cri
 Currently, the library includes support for:
 
 * **UNISIG (BSL 3.6.0)**: Standard messaging for ETCS/ERTMS systems.
-    - Train To Track: working
-    - Track To Train: planned
-    - Euroloop: planned
-    - Eurobalise: planned
-    - RBC to RBC: planned
+    - [x] Train To Track: done 🥳
+    - [ ] Track To Train: working
+    - [ ] Euroloop: planned
+    - [ ] Eurobalise: planned
+    - [ ] RBC to RBC: planned
 * **EULYNX**: Protocol for controlling and monitoring trackside objects.
     - Planned.
 * **RaSTA** (Rail Safe Transport Application): A secure transport layer for railway applications.
@@ -63,4 +63,58 @@ pip install -e .[test]
 
 <!-- coverage-end -->
 ## 🚂 Example
-TODO
+
+Here is how to create a message, add a packet, and serialize it to hex:
+
+```python
+from fervoja.application_layer.unisig.train2track.messages import Factory as MessageFactory
+from fervoja.application_layer.unisig.train2track.packets import Factory as PacketFactory
+
+# 1. Initialize the factories
+pkt_factory = PacketFactory()
+msg_factory = MessageFactory()
+
+# 2. Get the desired message and packet
+pkt_0 = pkt_factory.get(0)
+msg_136 = msg_factory.get(136)
+
+# 3. Change any field
+pkt_0["NID_LRBG"] = 1234
+msg_136["NID_ENGINE"] = 1234
+
+# 4. Add the packet to the message
+msg_136.add_packet(pkt_0)
+
+# 5. View the string representation
+print(msg_136)
+
+# 6. Serialize to hex for transmission
+print(msg_136.encode_hex())
+```
+Output:
+```
+{
+	NID_MESSAGE : 136,
+	L_MESSAGE : 24,
+	T_TRAIN : 0,
+	NID_ENGINE : 1234,
+	{
+		NID_PACKET : 0,
+		L_PACKET : 114,
+		Q_SCALE : 0,
+		NID_LRBG : 1234,
+		D_LRBG : 0,
+		Q_DIRLRBG : 0,
+		Q_DLRBG : 0,
+		L_DOUBTOVER : 0,
+		L_DOUBTUNDER : 0,
+		Q_LENGTH : 0,
+		V_TRAIN : 0,
+		Q_DIRTRAIN : 0,
+		M_MODE : 0,
+		M_LEVEL : 0,
+	},
+	PADDING : 0000
+}
+8806000000000001348000E4000269000000000000000000
+```
