@@ -7,6 +7,8 @@
 
 The main goal is to provide a unified and lightweight interface to work with critical industry standards without relying on heavy external dependencies.
 
+The library is not intended for use in safety-critical execution environments, as Python does not meet the strict determinism and certification requirements (e.g., CENELEC standards) for such systems. However, it is an incredibly powerful utility for testing and simulation. Test engineers can easily serialize edge-case or intentionally invalid messages to validate the fault tolerance of real products, while developers can use it to rapidly translate and debug messages in their toolchains.
+
 ## 🛠 Supported Protocols
 
 Currently, the library includes support for:
