@@ -45,7 +45,7 @@ pip install -e .[test]
 <!-- coverage-start -->
 | Name                                                      |    Stmts |     Miss |   Branch |   BrPart |   Cover |
 |---------------------------------------------------------- | -------: | -------: | -------: | -------: | ------: |
-| fervoja/application\_layer/unisig/containers.py           |      154 |       16 |       28 |        5 |     88% |
+| fervoja/application\_layer/unisig/containers.py           |      155 |       16 |       30 |        6 |     88% |
 | fervoja/application\_layer/unisig/interfaces.py           |        7 |        0 |        0 |        0 |    100% |
 | fervoja/application\_layer/unisig/train2track/messages.py |       86 |        0 |        2 |        0 |    100% |
 | fervoja/application\_layer/unisig/train2track/packets.py  |       99 |        0 |        8 |        0 |    100% |
@@ -60,7 +60,7 @@ pip install -e .[test]
 | fervoja/foundations/logger.py                             |       40 |        3 |        8 |        1 |     92% |
 | fervoja/foundations/singleton.py                          |       10 |        0 |        2 |        0 |    100% |
 | fervoja/foundations/values.py                             |      227 |        0 |       58 |        0 |    100% |
-| **TOTAL**                                                 | **1265** |   **19** |  **196** |    **6** | **98%** |
+| **TOTAL**                                                 | **1266** |   **19** |  **198** |    **7** | **98%** |
 
 10 empty files skipped.
 
