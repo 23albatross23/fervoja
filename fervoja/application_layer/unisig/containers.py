@@ -44,8 +44,10 @@ class UnisigPacket(UnisigContainer):
         super().__init__(fields=fields)
         
     def _update_length_field(self):
-        l_packet = self.get_size()
-        self[L_PACKET] = l_packet
+        if L_PACKET in self:
+            #It is weird, some packets don't have L_PACKET (0, 255)
+            l_packet = self.get_size()
+            self[L_PACKET] = l_packet
         
     def __setitem__(self, key : str, value : Field):
         super().__setitem__(key, value)
